@@ -2,17 +2,21 @@
 <?xml-model href="https://zavx0z.github.io/everywhere-everything/schema/where.xsd"?>
 <where>
     <name>
-        <en>Binary image</en>
-        <ru>Бинарное изображение</ru>
+        <en></en>
+        <ru>Массив точек линий</ru>
     </name>
     <description>
-        <ru>Бинарное изображение состоящее из 1 и 0 в формате png</ru>
-        <en></en>
+        <ru></ru>
     </description>
     <Type>
-        <String />
+        <Array col="1">
+            <Array col="2">
+                <Number type="float" />
+            </Array>
+        </Array>
     </Type>
     <things>
         image
+        line
     </things>
 </where>

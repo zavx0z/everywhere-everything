@@ -2,17 +2,17 @@
 <?xml-model href="https://zavx0z.github.io/everywhere-everything/schema/where.xsd"?>
 <where>
     <name>
-        <en>Binary image</en>
-        <ru>Бинарное изображение</ru>
+        <ru>Центральная линия</ru>
     </name>
     <description>
-        <ru>Бинарное изображение состоящее из 1 и 0 в формате png</ru>
-        <en></en>
+        <ru>Векторизованное изображение</ru>
     </description>
     <Type>
         <String />
     </Type>
     <things>
+        svg
         image
+        line
     </things>
 </where>

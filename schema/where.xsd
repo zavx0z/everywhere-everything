@@ -6,27 +6,53 @@
                 <xs:element name="name">
                     <xs:complexType>
                         <xs:sequence>
-                            <xs:element name="ru" type="xs:string" />
-                            <xs:element name="en" type="xs:string" />
+                            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                <xs:element name="en" />
+                                <xs:element name="ru" type="xs:string" />
+                            </xs:choice>
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="description">
                     <xs:complexType>
                         <xs:sequence>
-                            <xs:element name="ru" type="xs:string" />
+                            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                <xs:element name="en" />
+                                <xs:element name="ru" />
+                            </xs:choice>
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
-                <xs:element name="type">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element name="String" />
-                        </xs:sequence>
-                    </xs:complexType>
-                </xs:element>
+                <xs:element ref="Type" />
                 <xs:element name="things" type="xs:string" />
             </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="Type">
+        <xs:complexType>
+            <xs:choice>
+                <xs:element name="String" />
+                <xs:element name="Array">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Array">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="Number">
+                                            <xs:complexType>
+                                                <xs:attribute name="type" use="required" />
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute name="col" type="xs:integer" use="required" />
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="col" type="xs:integer" use="required" />
+                    </xs:complexType>
+                </xs:element>
+            </xs:choice>
         </xs:complexType>
     </xs:element>
 </xs:schema>
