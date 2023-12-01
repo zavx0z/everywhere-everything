@@ -1,4 +1,4 @@
-<?xml-model href="https://github.com/zavx0z/everywhere-everything/schema/props.xsd"?>
+<?xml-model href="https://zavx0z.github.io/everywhere-everything/schema/prop.xsd"?>
 <where>
     <name>
         <ru>Бинарное изображение</ru>
