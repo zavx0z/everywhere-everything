@@ -1,0 +1,16 @@
+<?xml-model href="https://github.com/zavx0z/everywhere-everything/schema/props.xsd"?>
+<where>
+    <name>
+        <ru>Бинарное изображение</ru>
+        <en>Binary image</en>
+    </name>
+    <description>
+        <ru>Бинарное изображение состоящее из 1 и 0 в формате png</ru>
+    </description>
+    <type>
+        <String />
+    </type>
+    <things>
+        image
+    </things>
+</where>
