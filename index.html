@@ -6,15 +6,19 @@
     <title>Node</title>
     <style>
       body {
-          font-family: Arial, sans-serif;
+        font-family: Arial, sans-serif;
       }
     </style>
+    <dev-tools mobile></dev-tools>
     <script type="module">
-      import("./src/index.js")
+      await new Promise((res) => import("https://zavx0z.github.io/dev-tools/index.js").then(() => setTimeout(res, 444)))
+
+      const component = document.createElement("component-node")
+      component.setAttribute("schema", "example/schema.json")
+      import("./src/index.js").then((module) => customElements.define(component.tagName.toLowerCase(), module.default))
+      document.body.appendChild(component)
+      component.style.color = "blue"
     </script>
   </head>
-  <body>
-    <metafor-node>
-    </metafor-node>
-  </body>
+  <body></body>
 </html>

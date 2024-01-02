@@ -1,0 +1,36 @@
+{
+  "$schema": "https://zavx0z.github.io/node/schema.json#",
+  "title": "Default title",
+  "description": "Default description without localization",
+  "input": {
+    "filePath": {
+      "type": "string",
+      "title": {
+        "ru": "Путь к изображению"
+      },
+      "description": {
+        "en": "Description with localization",
+        "ru": "Описание с локализацией"
+      },
+      "examples": ["c:\\images\\image.png"],
+      "pattern": "^.*\\.(jpg|jpeg|png|gif|bmp)$"
+    }
+  },
+  "output": {
+    "base64": {
+      "type": "string",
+      "title": {
+        "ru": "Base64 string",
+        "en": "Base64 string",
+        "de": "Base64 string"
+      },
+      "description": {
+        "en": "Description with localization",
+        "ru": "Описание с локализацией",
+        "de": "Beschreibung mit Lokalisierung"
+      },
+      "examples": ["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAA"],
+      "pattern": "^data:image/.*;base64,.*$"
+    }
+  }
+}
