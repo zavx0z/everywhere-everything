@@ -23,20 +23,23 @@ export default class Node extends HTMLElement {
       }
     }
     this.#host.innerHTML = /*html*/ `
-    <h1 class="node-title">
-      ${i18n(schema.title)} 
-    </h1>
-
-    <p class="node-description">
-      ${i18n(schema.description)}
-    </p>
-
-    <div class="sockets-input">
-      ${input}
-    </div>
-
-    <div class="sockets-output">
-      ${output}
+    <div class="node">
+      <div class="node-title">
+        <h1 class="node-title-text">
+          ${i18n(schema.title)} 
+        </h1>
+        <p class="node-description">
+          ${i18n(schema.description)}
+        </p>
+      </div>
+      <div class="node-body"
+        <div class="node-body-sockets">
+          ${input}
+        </div>
+        <div class="node-body-sockets">
+          ${output}
+        </div>
+      </div>
     </div>
   `
   }
