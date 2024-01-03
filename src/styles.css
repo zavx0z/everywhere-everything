@@ -1,97 +1,117 @@
-host {
-    --secondary-900: rgb(var(--color-secondary-900, 35 93 57) / 1);
+:host {
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 1rem;
+  line-height: 1.5rem;
+  --secondary-900: rgb(var(--color-secondary-900, 35 93 57) / 1);
 
-    --surface-800: rgb(var(--color-surface-800, 34 46 64) / 1);
-    --surface-900: rgb(var(--color-surface-900, 27 38 52) / 1);
+  --surface-500: rgb(var(--color-surface-500, 56 77 107) / 1);
+  --surface-700: rgb(var(--color-surface-700, 42 58 80) / 1);
+  --surface-800: rgb(var(--color-surface-800, 34 46 64) / 1);
+  --surface-900: rgb(var(--color-surface-900, 27 38 52) / 1);
 
-    --box-shadow-lg-slate-900: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
-    --drop-shadow-lg: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1));
+  --box-shadow-lg-slate-900: 0 10px 15px -3px rgb(15, 23, 42), 0 4px 6px -2px rgb(15, 23, 42);
+  --drop-shadow-lg: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1));
 }
-
 .node {
-    display: grid;
-    width: 24rem;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    grid-template-rows: 2rem max-content;
-    border-radius: 0.375rem;
-    background-color: var(--color-surface-800);
-    box-shadow: var(--box-shadow-lg-slate-900);
+  display: grid;
+  width: 24rem;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-rows: 2rem max-content;
+  border-radius: 0.375rem;
+  background-color: var(--surface-700);
+  box-shadow: var(--box-shadow-lg-slate-900);
 }
-
 .node-title {
-    display: flex;
-    align-items: center;
-    border-top-left-radius: 0.375rem;
-    border-top-right-radius: 0.375rem;
-    padding: 0 0.5rem;
-    background-color: var(--secondary-900);
+  display: flex;
+  align-items: center;
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+  padding: 0 0.5rem;
+  background-color: var(--secondary-900);
 }
-
+.node-description {
+  visibility: hidden;
+}
 .node-title-text {
-    user-select: none;
-    filter: var(--drop-shadow-lg);
+  user-select: none;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0px;
+  filter: var(--drop-shadow-lg);
 }
-
 .node-body {
-    display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    grid-template-rows: max-content 12rem max-content;
-    gap: 0.25rem;
-    border-bottom-right-radius: 0.375rem;
-    border-bottom-left-radius: 0.375rem;
-    padding: 0.5rem 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-rows: max-content max-content;
+  gap: 0.25rem;
+  border-bottom-right-radius: 0.375rem;
+  border-bottom-left-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
 }
-
 .node-body-sockets {
-    display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    gap: 0.5rem;
-    padding: 0.25rem 0;
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.25rem 0;
 }
-
 .socket {
-    display: flex;
-    position: relative;
-    justify-content: space-between;
-    gap: 0.5rem;
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
-
-.socket-port {
-    position: absolute;
-    left: -1.25rem;
-    top: 0.5rem;
-    height: 0.75rem;
-    width: .75rem;
-    border-radius: 9999px;
-    background-color: rgb(14 165 223 / 1);
-    outline-style: solid;
-    outline-width: 1px;
-    outline-color: #020617;
+.socket-port-input {
+  position: absolute;
+  left: -1.125rem;
+  top: 0.5rem;
+  height: 0.75rem;
+  width: 0.75rem;
+  border-radius: 9999px;
+  background-color: rgb(14 165 223 / 1);
+  outline-style: solid;
+  outline-width: 1px;
+  outline-color: #020617;
 }
-
+.socket-port-output {
+  position: absolute;
+  right: -1.125rem;
+  top: 0.5rem;
+  height: 0.75rem;
+  width: 0.75rem;
+  border-radius: 9999px;
+  background-color: rgb(14 165 223 / 1);
+  outline-style: solid;
+  outline-width: 1px;
+  outline-color: #020617;
+}
 .socket-label {
-    display: flex;
-    flex-shrink: 1;
-    filter: var(--drop-shadow-lg);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0px;
+  display: flex;
+  flex-shrink: 1;
+  filter: var(--drop-shadow-lg);
 }
-
 .socket-input {
-    display: flex;
-    min-height: 28px;
-    flex-grow: 1;
-    resize: both;
-    appearance: none;
-    white-space: pre-wrap;
-    border-radius: .375rem;
-    background-color: var(--color-surface-900);
-    padding: 0 0.5rem;
+  caret-color: aqua;
+  color: aqua;
+  display: flex;
+  min-height: 28px;
+  flex-grow: 1;
+  resize: both;
+  appearance: none;
+  white-space: pre-wrap;
+  border-radius: 4px;
+  background-color: var(--surface-500);
+  padding: 0 0.5rem;
+  border: none;
 }
-
 .socket-input:hover {
-    opacity: .75;
+  opacity: 0.75;
 }
-
 .socket-input:focus {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }

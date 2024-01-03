@@ -9,20 +9,8 @@ export default class Node extends HTMLElement {
   }
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
-
-    const socketTypes = new Set()
-    const input = Params(schema.input, socketTypes)
-    const output = Params(schema.output, socketTypes)
-    for (let socketType of socketTypes) {
-      switch (socketType) {
-        case "string":
-          import("./components/SocketString.js").then((module) => customElements.define("input-string", module.default))
-          break
-        default:
-          break
-      }
-    }
     this.#host.innerHTML = /*html*/ `
+    <link rel="stylesheet" href="src/styles.css" type="text/css">
     <div class="node">
       <div class="node-title">
         <h1 class="node-title-text">
@@ -32,12 +20,12 @@ export default class Node extends HTMLElement {
           ${i18n(schema.description)}
         </p>
       </div>
-      <div class="node-body"
+      <div class="node-body">
         <div class="node-body-sockets">
-          ${input}
+          ${Params(schema.input, "input")}
         </div>
         <div class="node-body-sockets">
-          ${output}
+          ${Params(schema.output, "output")}
         </div>
       </div>
     </div>
