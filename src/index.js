@@ -6,11 +6,14 @@ export default class Node extends HTMLElement {
   constructor() {
     super()
     this.#host = this.attachShadow({ mode: "closed" })
+    this.#host.innerHTML = /*html*/ `
+    <link rel="stylesheet" href="src/styles.css" type="text/css">
+    `
   }
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
-    this.#host.innerHTML = /*html*/ `
-    <link rel="stylesheet" href="src/styles.css" type="text/css">
+    const template = document.createElement("template")
+    template.innerHTML = /*html*/ `
     <div class="node">
       <div class="node-title">
         <h1 class="node-title-text">
@@ -29,6 +32,7 @@ export default class Node extends HTMLElement {
         </div>
       </div>
     </div>
-  `
+    `
+    this.#host.appendChild(template.content)
   }
 }

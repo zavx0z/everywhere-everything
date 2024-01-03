@@ -6,7 +6,7 @@ export default function (obj, directional) {
         case "string":
           return /*html*/ `
           <div class="socket">
-            <div class="socket-port-${directional}"></div>
+            <div class="socket-port socket-port-${directional}"></div>
             <label 
               class="socket-label"
               for="${key}"

@@ -19,7 +19,7 @@
   grid-template-rows: 2rem max-content;
   border-radius: 0.375rem;
   background-color: var(--surface-700);
-  box-shadow: var(--box-shadow-lg-slate-900);
+  box-shadow: 0px 3px 5px 4px rgba(15, 23, 42, 0.8);
 }
 .node-title {
   display: flex;
@@ -61,29 +61,23 @@
   justify-content: space-between;
   gap: 0.5rem;
 }
-.socket-port-input {
+.socket-port {
   position: absolute;
-  left: -1.125rem;
-  top: 0.5rem;
   height: 0.75rem;
   width: 0.75rem;
   border-radius: 9999px;
-  background-color: rgb(14 165 223 / 1);
+  background-color: rgb(14 165 223);
   outline-style: solid;
   outline-width: 1px;
   outline-color: #020617;
 }
+.socket-port-input {
+  left: -1.125rem;
+  top: 0.5rem;
+}
 .socket-port-output {
-  position: absolute;
   right: -1.125rem;
   top: 0.5rem;
-  height: 0.75rem;
-  width: 0.75rem;
-  border-radius: 9999px;
-  background-color: rgb(14 165 223 / 1);
-  outline-style: solid;
-  outline-width: 1px;
-  outline-color: #020617;
 }
 .socket-label {
   font-size: 16px;
