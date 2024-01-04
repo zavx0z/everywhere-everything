@@ -16,18 +16,18 @@ export default class Node extends HTMLElement {
     template.innerHTML = /*html*/ `
     <div class="node">
       <div class="node-title">
-        <h1 class="node-title-text">
+        <h1 class="no-select">
           ${i18n(schema.title)} 
         </h1>
-        <p class="node-description">
+        <p class="description">
           ${i18n(schema.description)}
         </p>
       </div>
       <div class="node-body">
-        <div class="node-body-sockets">
+        <div>
           ${Params(schema.input, "input")}
         </div>
-        <div class="node-body-sockets">
+        <div>
           ${Params(schema.output, "output")}
         </div>
       </div>

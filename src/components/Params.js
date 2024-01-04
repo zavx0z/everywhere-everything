@@ -5,16 +5,15 @@ export default function (obj, directional) {
       switch (value.type) {
         case "string":
           return /*html*/ `
-          <div class="socket">
-            <div class="socket-port socket-port-${directional}"></div>
+          <div class="param">
+            <div class="port ${directional}"></div>
             <label 
-              class="socket-label"
+              class="no-select"
               for="${key}"
             >
               ${i18n(value.title)}
             </label>
             <input
-              class="socket-input"
               type="text"
               name="${key}"
               value="${value.default || ""}"
