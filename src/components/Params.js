@@ -19,7 +19,7 @@ export default function (obj, directional) {
               value="${value.default || ""}"
             />
           </div>
-        `
+        `.trim()
         // case "number":
         //   return /*html*/ `
         //   <input
@@ -38,6 +38,6 @@ export default function (obj, directional) {
           return ""
       }
     })
-    .join("")
+    .join("").trim()
   return html
 }
