@@ -1,4 +1,3 @@
-import Params from "./components/Params.js"
 import styles from "./styles.js"
 import { i18n } from "./utils.js"
 const html = String.raw
@@ -27,29 +26,22 @@ export default class Node extends HTMLElement {
           <button-preview preview=${this.preview} />
         </div>
         <div class="node-body">
-          <div>${Params(schema.input, "input")}</div>
+          <div>
+            ${Object.entries(schema.input)
+              .map(([key, value]) => {
+                switch (value.type) {
+                  case "string":
+                    return html`<input-file-device label="${i18n(value.title)}" key="${key}" />`
+                }
+              })
+              .join("")}
+          </div>
           <div>
             ${Object.entries(schema.output)
               .map(([key, value]) => {
                 switch (value.type) {
                   case "string":
                     return html`<output-string label="${i18n(value.title)}" />`
-                  // case "number":
-                  //   return /*html*/ `
-                  //   <input
-                  //     type="number"
-                  //     name="${key}"
-                  //     value="${value.default || ""}"
-                  //   />`
-                  // case "boolean":
-                  //   return /*html*/ `
-                  //   <input
-                  //     type="checkbox"
-                  //     name="${key}"
-                  //     ${value.default ? "checked" : ""}
-                  //   />`
-                  default:
-                    return ""
                 }
               })
               .join("")}
@@ -59,6 +51,7 @@ export default class Node extends HTMLElement {
     `
     this.#host.appendChild(template.content)
     import("./output/String.js")
+    import("./input/file-device/component.js")
 
     if (schema.preview) {
       const button = this.#host.querySelector("button-preview")
