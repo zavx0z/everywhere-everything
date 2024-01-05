@@ -87,6 +87,10 @@
         "title": "Node description",
         "$ref": "#/definitions/localizedString"
       },
+      "preview": {
+        "title": "Preview result",
+        "type": "boolean"
+      },
       "input": {
         "title": "Node input parameters",
         "$ref": "#/definitions/params"

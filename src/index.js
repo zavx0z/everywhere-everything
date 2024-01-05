@@ -14,7 +14,6 @@ export default class Node extends HTMLElement {
   // </p>
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
-    const preview = true
     const template = document.createElement("template")
     template.innerHTML = html`
       <div class="node">
@@ -30,7 +29,7 @@ export default class Node extends HTMLElement {
     `
     this.#host.appendChild(template.content)
 
-    if (preview) {
+    if (schema.preview) {
       const button = this.#host.querySelector("button-preview")
       import("./components/ButtonPreview.js")
       button.onclick = ({ currentTarget }) => console.log(currentTarget.preview)

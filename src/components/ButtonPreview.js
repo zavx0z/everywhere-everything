@@ -16,7 +16,7 @@ class ButtonPreview extends HTMLElement {
           align-items: center;
           cursor: pointer;
           & path {
-            transition: fill 0.2s ease-in-out;
+            transition: fill 0.1s ease-in-out;
             fill: var(--primary-300);
           }
           &:hover path {
