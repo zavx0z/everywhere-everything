@@ -32,12 +32,16 @@
       await new Promise((res) =>
         import("https://zavx0z.github.io/dev-tools/index.js")
           .then(() => setTimeout(res, 444))
-          .catch((err) => console.log(err))
+          .catch((err) => {
+            console.log(err)
+            res({ error: err })
+          })
       )
       const component = document.createElement("component-node")
       component.setAttribute("schema", "example/schema.json")
       import("./src/index.js").then((module) => customElements.define(component.tagName.toLowerCase(), module.default))
       document.body.appendChild(component)
+      // document.body.appendChild(component.cloneNode())
     </script>
   </head>
   <body></body>

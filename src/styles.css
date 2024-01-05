@@ -63,23 +63,6 @@
     filter: var(--drop-shadow-lg);
     margin: 0;
   }
-  & button {
-    padding: 0;
-    background-color: transparent;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-
-    &:hover path {
-      fill: var(--primary-500);
-    }
-
-    & path {
-      fill: var(--primary-200);
-    }
-  }
   .description {
     display: none;
   }
