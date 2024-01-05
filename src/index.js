@@ -23,11 +23,37 @@ export default class Node extends HTMLElement {
         </div>
         <div class="node-body">
           <div>${Params(schema.input, "input")}</div>
-          <div>${Params(schema.output, "output")}</div>
+          <div>
+            ${Object.entries(schema.output)
+              .map(([key, value]) => {
+                switch (value.type) {
+                  case "string":
+                    return html`<output-string label="${i18n(value.title)}" />`
+                  // case "number":
+                  //   return /*html*/ `
+                  //   <input
+                  //     type="number"
+                  //     name="${key}"
+                  //     value="${value.default || ""}"
+                  //   />`
+                  // case "boolean":
+                  //   return /*html*/ `
+                  //   <input
+                  //     type="checkbox"
+                  //     name="${key}"
+                  //     ${value.default ? "checked" : ""}
+                  //   />`
+                  default:
+                    return ""
+                }
+              })
+              .join("")}
+          </div>
         </div>
       </div>
     `
     this.#host.appendChild(template.content)
+    import("./output/string/component.js")
 
     if (schema.preview) {
       const button = this.#host.querySelector("button-preview")
