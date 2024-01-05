@@ -1,4 +1,5 @@
 import Params from "./components/Params.js"
+import styles from "./styles.js"
 import { i18n } from "./utils.js"
 const html = String.raw
 export default class Node extends HTMLElement {
@@ -7,7 +8,11 @@ export default class Node extends HTMLElement {
   constructor() {
     super()
     this.#host = this.attachShadow({ mode: "closed" })
-    this.#host.innerHTML = html` <link rel="stylesheet" href="src/styles.css" type="text/css" /> `
+    this.#host.innerHTML = html`
+      <style>
+        ${styles}
+      </style>
+    `
   }
   //   <p class="description">
   //   ${i18n(schema.description)}
@@ -53,7 +58,7 @@ export default class Node extends HTMLElement {
       </div>
     `
     this.#host.appendChild(template.content)
-    import("./output/string/component.js")
+    import("./output/String.js")
 
     if (schema.preview) {
       const button = this.#host.querySelector("button-preview")
