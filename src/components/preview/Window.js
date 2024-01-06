@@ -8,8 +8,8 @@ class Preview extends HTMLElement {
       <style>
         ${styles}
       </style>
-      <div class="preview-content"></div>
       <div class="blur"></div>
+      <div class="preview-content"></div>
     `
   }
   connectedCallback() {}

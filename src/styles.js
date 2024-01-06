@@ -47,6 +47,7 @@ export default css`
     border-radius: var(--node-border-radius);
     background-color: var(--surface-700);
     box-shadow: 0px 3px 5px 4px rgba(15, 23, 42, 0.8);
+    z-index: 4;
   }
   .header {
     position: relative;

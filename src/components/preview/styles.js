@@ -16,13 +16,24 @@ export default css`
     padding: 0.2rem;
 
     & > div:first-of-type {
-      --color: #56595963;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      filter: blur(3px);
+      z-index: -1;
+      background-color: var(--surface-500);
+    }
+
+    & > div:last-of-type {
+      --color: var(--surface-800);
       --size: 14px;
       position: relative;
       width: 100%;
       height: 100%;
       border: 2px;
-      border-color: rgb(15, 23, 42);
+      border-color: var(--surface-800);
       border-style: solid;
       background-image: linear-gradient(
           45deg,
@@ -36,17 +47,6 @@ export default css`
       background-size: var(--size) var(--size); /* Размер ячеек сетки */
       background-position: 0 0, calc(var(--size) / 2) calc(var(--size) / 2); /* Смещение для создания эффекта шахматной доски */
       border-radius: calc(var(--node-border-radius) / 2);
-    }
-
-    & > div:last-of-type {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      filter: blur(4px);
-      z-index: -1;
-      background-color: rgb(15, 23, 42);
     }
   }
 `
