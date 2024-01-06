@@ -14,6 +14,8 @@ export default css`
     aspect-ratio: 16 / 9;
     z-index: 4;
     padding: 0.2rem;
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out;
 
     & > div:first-of-type {
       position: absolute;

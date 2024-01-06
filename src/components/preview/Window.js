@@ -12,6 +12,17 @@ class Preview extends HTMLElement {
       <div class="preview-content"></div>
     `
   }
-  connectedCallback() {}
+  static get observedAttributes() {
+    return ["preview"]
+  }
+  attributeChangedCallback() {
+    this.style.opacity = this.preview ? "1" : "0"
+  }
+  get preview() {
+    return this.getAttribute("preview") === "true"
+  }
+  set preview(value) {
+    this.setAttribute("preview", value)
+  }
 }
 customElements.define("preview-window", Preview)

@@ -3,7 +3,7 @@ import { i18n } from "./utils.js"
 const html = String.raw
 export default class Node extends HTMLElement {
   /** @type {ShadowRoot} */ #host
-  preview = true
+  preview = false
   constructor() {
     super()
     this.#host = this.attachShadow({ mode: "closed" })
@@ -13,15 +13,12 @@ export default class Node extends HTMLElement {
       </style>
     `
   }
-  //   <p class="description">
-  //   ${i18n(schema.description)}
-  // </p>
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
     const template = document.createElement("template")
     template.innerHTML = html`
       <div class="node">
-        <preview-window> </preview-window>
+        <preview-window preview=${this.preview}> </preview-window>
         <div class="header">
           <h1>${i18n(schema.title)}</h1>
           <preview-button preview=${this.preview}></preview-button>
@@ -52,10 +49,7 @@ export default class Node extends HTMLElement {
     `
     await this.#import(schema)
     this.#host.appendChild(template.content)
-    if (schema.preview) {
-      const button = this.#host.querySelector("preview-button")
-      button.onclick = ({ currentTarget }) => console.log(currentTarget.preview)
-    }
+    if (schema.preview) this.#handlerTogglePreview()
   }
   async #import(schema) {
     const imports = []
@@ -66,5 +60,13 @@ export default class Node extends HTMLElement {
       imports.push("./components/preview/Window.js")
     }
     await Promise.all(imports.map((js) => import(js)))
+  }
+  #handlerTogglePreview() {
+    const button = this.#host.querySelector("preview-button")
+    const previewWindow = this.#host.querySelector("preview-window")
+    button.onclick = ({ currentTarget }) => {
+      this.preview = currentTarget.preview
+      previewWindow.preview = currentTarget.preview
+    }
   }
 }
