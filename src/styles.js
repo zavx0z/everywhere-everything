@@ -26,6 +26,8 @@ export default css`
 
     --box-shadow-lg-slate-900: 0 10px 15px -3px rgb(15, 23, 42), 0 4px 6px -2px rgb(15, 23, 42);
     --drop-shadow-lg: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.04)) drop-shadow(0 4px 3px rgba(0, 0, 0, 0.1));
+
+    --node-border-radius: 0.375rem;
   }
   @layer utils {
     .no-select {
@@ -37,22 +39,23 @@ export default css`
     }
   }
   .node {
+    position: relative;
     display: grid;
     width: 22rem;
     grid-template-columns: repeat(1, minmax(0, 1fr));
     grid-template-rows: 2rem max-content;
-    border-radius: 0.375rem;
+    border-radius: var(--node-border-radius);
     background-color: var(--surface-700);
     box-shadow: 0px 3px 5px 4px rgba(15, 23, 42, 0.8);
   }
   .header {
+    position: relative;
     display: grid;
     grid-template-columns: max-content max-content;
     grid-template-rows: 1fr;
     justify-content: space-between;
     align-items: center;
-    border-top-left-radius: 0.375rem;
-    border-top-right-radius: 0.375rem;
+    border-radius: var(--node-border-radius) var(--node-border-radius) 0 0;
     padding: 0 0.5rem;
     background-color: var(--secondary-900);
     & h1 {
@@ -72,12 +75,12 @@ export default css`
 
   .node-body {
     display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    grid-template-rows: max-content max-content;
+    grid-template-columns: 1fr;
+    grid-template-rows: 2rem;
     gap: 0.25rem;
-    border-bottom-right-radius: 0.375rem;
-    border-bottom-left-radius: 0.375rem;
+    border-radius: 0 0 var(--node-border-radius) var(--node-border-radius);
     padding: 0.5rem 0.75rem;
+
     & > div {
       display: grid;
       grid-template-columns: repeat(1, minmax(0, 1fr));

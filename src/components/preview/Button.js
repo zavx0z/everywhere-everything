@@ -28,4 +28,4 @@ class ButtonPreview extends HTMLElement {
     this.setAttribute("preview", value)
   }
 }
-customElements.define("button-preview", ButtonPreview)
+customElements.define("preview-button", ButtonPreview)

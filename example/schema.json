@@ -1,6 +1,9 @@
 {
   "$schema": "https://zavx0z.github.io/node/schema.json#",
-  "title": "Default title",
+  "title": {
+    "en": "Image",
+    "ru": "Изображение"
+  },
   "description": "Default description without localization",
   "preview": true,
   "input": {

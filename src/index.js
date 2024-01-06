@@ -21,9 +21,10 @@ export default class Node extends HTMLElement {
     const template = document.createElement("template")
     template.innerHTML = html`
       <div class="node">
+        <preview-window> </preview-window>
         <div class="header">
           <h1>${i18n(schema.title)}</h1>
-          <button-preview preview=${this.preview} />
+          <preview-button preview=${this.preview}></preview-button>
         </div>
         <div class="node-body">
           <div>
@@ -31,7 +32,7 @@ export default class Node extends HTMLElement {
               .map(([key, value]) => {
                 switch (value.type) {
                   case "string":
-                    return html`<input-file-device label="${i18n(value.title)}" key="${key}" />`
+                    return html` <input-file-device label="${i18n(value.title)}" key="${key}"></input-file-device> `
                 }
               })
               .join("")}
@@ -41,7 +42,7 @@ export default class Node extends HTMLElement {
               .map(([key, value]) => {
                 switch (value.type) {
                   case "string":
-                    return html`<output-string label="${i18n(value.title)}" />`
+                    return html` <output-string label="${i18n(value.title)}"></output-string> `
                 }
               })
               .join("")}
@@ -49,14 +50,21 @@ export default class Node extends HTMLElement {
         </div>
       </div>
     `
+    await this.#import(schema)
     this.#host.appendChild(template.content)
-    import("./output/String.js")
-    import("./input/file-device/component.js")
-
     if (schema.preview) {
-      const button = this.#host.querySelector("button-preview")
-      import("./components/ButtonPreview.js")
+      const button = this.#host.querySelector("preview-button")
       button.onclick = ({ currentTarget }) => console.log(currentTarget.preview)
     }
+  }
+  async #import(schema) {
+    const imports = []
+    imports.push("./output/String.js")
+    imports.push("./input/file-device/component.js")
+    if (schema.preview) {
+      imports.push("./components/preview/Button.js")
+      imports.push("./components/preview/Window.js")
+    }
+    await Promise.all(imports.map((js) => import(js)))
   }
 }
