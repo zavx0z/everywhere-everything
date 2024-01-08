@@ -98,15 +98,15 @@ export default css`
     align-items: center;
     cursor: pointer;
     & svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
     }
     & path {
       transition: fill 0.1s ease-in-out;
-      fill: var(--primary-300);
+      fill: var(--primary-200);
     }
     &:hover path {
-      fill: var(--primary-500);
+      fill: var(--primary-50);
     }
   }
 `
