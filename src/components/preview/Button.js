@@ -3,9 +3,17 @@ class ButtonPreview extends HTMLElement {
   constructor() {
     super()
     const button = document.createElement("button")
-    button.onclick = () => (this.preview = !this.preview)
     this.appendChild(button)
     this.#button = button
+  }
+  handleTogglePreview = (event) => {
+    event.stopPropagation()
+    this.preview = !this.preview
+    this.dispatchEvent(new CustomEvent("togglePreview"))
+  }
+  connectedCallback() {
+    this.#button.addEventListener("click", this.handleTogglePreview)
+    this.#button.addEventListener("touchstart", this.handleTogglePreview)
   }
   static get observedAttributes() {
     return ["preview"]

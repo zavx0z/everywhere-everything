@@ -21,10 +21,6 @@
         height: 100svh;
         width: 100svw;
         overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
       }
     </style>
     <dev-tools mobile></dev-tools>
@@ -38,6 +34,7 @@
           })
       )
       const component = document.createElement("component-node")
+      component.setAttribute("id", "example")
       component.setAttribute("schema", "example/schema.json")
       import("./src/index.js").then((module) => customElements.define(component.tagName.toLowerCase(), module.default))
       document.body.appendChild(component)

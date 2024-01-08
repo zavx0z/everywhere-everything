@@ -1,29 +1,57 @@
 import styles from "./styles.js"
 import { i18n } from "./utils.js"
 const html = String.raw
+async function importComponents(schema) {
+  const imports = [
+    "./components/NodeContainer.js",
+    "./components/NodeBody.js",
+    "./components/NodeHeader.js",
+    "./output/String.js",
+    "./input/file-device/component.js",
+  ]
+  if (schema.preview) {
+    imports.push("./components/preview/Button.js")
+    imports.push("./components/preview/Window.js")
+  }
+  await Promise.all(imports.map((js) => import(js)))
+}
 export default class Node extends HTMLElement {
-  /** @type {ShadowRoot} */ #host
-  preview = false
+  /** @type {HTMLElement} */ #node
+  /** @type {HTMLElement} */ #header
+  /** @type {HTMLElement|undefined} */ #previewWindow
+  /** @type {HTMLElement|undefined} */ #previewButton
+  #state
   constructor() {
     super()
-    this.#host = this.attachShadow({ mode: "closed" })
-    this.#host.innerHTML = html`
-      <style>
-        ${styles}
-      </style>
-    `
+    const snapshot = localStorage.getItem(this.getAttribute("id"))
+    this.#state = snapshot
+      ? JSON.parse(snapshot)
+      : {
+          preview: false,
+          size: {
+            width: 400,
+          },
+          position: {
+            x: 0,
+            y: 0,
+          },
+        }
   }
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
-    const template = document.createElement("template")
-    template.innerHTML = html`
-      <node-container>
-        <preview-window preview=${this.preview}> </preview-window>
-        <div class="header">
+    await importComponents(schema)
+    const host = this.attachShadow({ mode: "closed" })
+    host.innerHTML = html`
+      <style>
+        ${styles}
+      </style>
+      <node-container top=${this.#state.position.y} left=${this.#state.position.x} width=${this.#state.size.width}>
+        <preview-window preview=${this.#state.preview}> </preview-window>
+        <node-header>
           <h1>${i18n(schema.title)}</h1>
-          <preview-button preview=${this.preview}></preview-button>
-        </div>
-        <div class="node-body">
+          <preview-button preview=${this.#state.preview}></preview-button>
+        </node-header>
+        <node-body>
           <div>
             ${Object.entries(schema.input)
               .map(([key, value]) => {
@@ -44,30 +72,33 @@ export default class Node extends HTMLElement {
               })
               .join("")}
           </div>
-        </div>
+        </node-body>
       </node-container>
     `
-    await this.#import(schema)
-    this.#host.appendChild(template.content)
-    if (schema.preview) this.#handlerTogglePreview()
-  }
-  async #import(schema) {
-    const imports = []
-    imports.push("./components/container/component.js")
-    imports.push("./output/String.js")
-    imports.push("./input/file-device/component.js")
+    this.#node = host.querySelector("node-container")
+    this.#header = host.querySelector("node-header")
+    this.#header.addEventListener("move", this.#handleMove)
     if (schema.preview) {
-      imports.push("./components/preview/Button.js")
-      imports.push("./components/preview/Window.js")
+      this.#previewWindow = host.querySelector("preview-window")
+      this.#previewButton = host.querySelector("preview-button")
+      this.#previewButton.addEventListener("togglePreview", this.#handlePreview)
     }
-    await Promise.all(imports.map((js) => import(js)))
   }
-  #handlerTogglePreview() {
-    const button = this.#host.querySelector("preview-button")
-    const previewWindow = this.#host.querySelector("preview-window")
-    button.onclick = ({ currentTarget }) => {
-      this.preview = currentTarget.preview
-      previewWindow.preview = currentTarget.preview
+  #handleMove = (event) => {
+    this.#node.left += event.detail.x
+    this.#node.top += event.detail.y
+    this.#state.position = {
+      x: this.#node.left,
+      y: this.#node.top,
     }
+    localStorage.setItem(this.getAttribute("id"), JSON.stringify(this.#state))
+  }
+  #handlePreview = (event) => {
+    this.#state.preview = this.#previewWindow.preview = event.target.preview
+    localStorage.setItem(this.getAttribute("id"), JSON.stringify(this.#state))
+  }
+  disconnectedCallback() {
+    this.#header.removeEventListener("move", this.#handleMove)
+    if (this.#previewButton) this.#previewButton.removeEventListener("togglePreview", this.#handlePreview)
   }
 }

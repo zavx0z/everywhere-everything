@@ -38,46 +38,6 @@ export default css`
       cursor: default;
     }
   }
-  .header {
-    position: relative;
-    display: grid;
-    grid-template-columns: max-content max-content;
-    grid-template-rows: 1fr;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: var(--node-border-radius) var(--node-border-radius) 0 0;
-    padding: 0 0.5rem;
-    background-color: var(--secondary-900);
-    & h1 {
-      display: inline;
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 1.5;
-      letter-spacing: 0px;
-      color: white;
-      filter: var(--drop-shadow-lg);
-      margin: 0;
-    }
-    .description {
-      display: none;
-    }
-  }
-
-  .node-body {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 2rem;
-    gap: 0.25rem;
-    border-radius: 0 0 var(--node-border-radius) var(--node-border-radius);
-    padding: 0.5rem 0.75rem;
-
-    & > div {
-      display: grid;
-      grid-template-columns: repeat(1, minmax(0, 1fr));
-      gap: 0.5rem;
-      padding: 0.25rem 0;
-    }
-  }
   button {
     padding: 0;
     background-color: transparent;
