@@ -17,7 +17,7 @@ export default class Node extends HTMLElement {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
     const template = document.createElement("template")
     template.innerHTML = html`
-      <div class="node">
+      <node-container>
         <preview-window preview=${this.preview}> </preview-window>
         <div class="header">
           <h1>${i18n(schema.title)}</h1>
@@ -45,7 +45,7 @@ export default class Node extends HTMLElement {
               .join("")}
           </div>
         </div>
-      </div>
+      </node-container>
     `
     await this.#import(schema)
     this.#host.appendChild(template.content)
@@ -53,6 +53,7 @@ export default class Node extends HTMLElement {
   }
   async #import(schema) {
     const imports = []
+    imports.push("./components/container/component.js")
     imports.push("./output/String.js")
     imports.push("./input/file-device/component.js")
     if (schema.preview) {
