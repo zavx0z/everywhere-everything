@@ -6,18 +6,6 @@ export default css`
     grid-template-rows: 28px;
     position: relative;
 
-    .port {
-      position: absolute;
-      height: 0.75rem;
-      width: 0.75rem;
-      border-radius: 9999px;
-      background-color: rgb(14 165 223);
-      outline-style: solid;
-      outline-width: 1px;
-      outline-color: #020617;
-      left: -1.125rem;
-      top: 0.5rem;
-    }
     & label {
       font-size: 16px;
       font-weight: 400;

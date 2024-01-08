@@ -38,6 +38,38 @@ export default css`
       cursor: default;
     }
   }
+  .port {
+    --port-size: 12px;
+    position: absolute;
+    height: var(--port-size);
+    width: var(--port-size);
+    border-radius: 9999px;
+    background-color: rgb(14 165 223);
+    outline-style: solid;
+    outline-width: 1px;
+    outline-color: #020617;
+    top: 8px;
+
+    & button {
+      --size: 22px;
+      --position: -5px;
+      position: absolute;
+      background-color: transparent;
+      border-radius: 9999px;
+      height: var(--size);
+      width: var(--size);
+      left: var(--position);
+      top: var(--position);
+    }
+  }
+  output-port {
+    right: -18px;
+  }
+
+  input-port {
+    left: -18px;
+  }
+
   button {
     padding: 0;
     background-color: transparent;

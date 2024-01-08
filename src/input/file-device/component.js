@@ -1,3 +1,5 @@
+import "../../port/InputPort.js"
+
 const html = String.raw
 import styles from "./styles.js"
 class FileDevice extends HTMLElement {
@@ -18,7 +20,7 @@ class FileDevice extends HTMLElement {
     const key = this.getAttribute("key")
     this.innerHTML += html`
       <div class="param">
-        <div class="port"></div>
+        <input-port></input-port>
         <input type="text" disabled name="${key}" />
         <span>
           <button title="open">

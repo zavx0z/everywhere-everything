@@ -8,12 +8,14 @@ const styles = css`
     gap: 0.25rem;
     border-radius: 0 0 var(--node-border-radius) var(--node-border-radius);
     padding: 0.5rem 0.75rem;
+    z-index: 1;
 
     & > div {
       display: grid;
       grid-template-columns: repeat(1, minmax(0, 1fr));
       gap: 0.5rem;
       padding: 0.25rem 0;
+      z-index: 2;
     }
   }
 `
