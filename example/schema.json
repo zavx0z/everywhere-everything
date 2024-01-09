@@ -10,7 +10,8 @@
     "filePath": {
       "type": "string",
       "title": {
-        "ru": "Путь к изображению"
+        "ru": "Открыть изображение",
+        "en": "Open image"
       },
       "description": {
         "en": "Description with localization",
