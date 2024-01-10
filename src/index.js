@@ -1,8 +1,7 @@
 import { i18n } from "./utils.js"
-import "./components/NodeContainer.js"
-import "./components/NodeBody.js"
-import "./components/NodeHeader.js"
 import "./elements/ButtonSettings.js"
+import "./output/String.js"
+import "./input/FileDevice.js"
 
 const html = String.raw
 class Node extends HTMLElement {
@@ -29,12 +28,11 @@ class Node extends HTMLElement {
   }
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
-    const imports = []
     this.style.setProperty("--x", this.#state.position.x)
     this.style.setProperty("--y", this.#state.position.y)
     this.style.setProperty("--width", this.#state.size.width)
 
-    const innerHTML = html`
+    this.innerHTML = html`
       <div class="preview"></div>
       <div class="header">
         <h1 class="no-select">${i18n(schema.title)}</h1>
@@ -45,13 +43,12 @@ class Node extends HTMLElement {
             onclick="this.value = this.value === 'hidden' ? 'visible' : 'hidden'"></button>
         </form>
       </div>
-      <node-body>
+      <div class="body">
         <div>
           ${Object.entries(schema.input)
             .map(([key, value]) => {
               switch (value.type) {
                 case "string":
-                  imports.push("./input/FileDevice.js")
                   return html` <input-file-device label="${i18n(value.title)}" key="${key}"></input-file-device> `
               }
             })
@@ -62,31 +59,17 @@ class Node extends HTMLElement {
             .map(([key, value]) => {
               switch (value.type) {
                 case "string":
-                  imports.push("./output/String.js")
                   return html` <output-string label="${i18n(value.title)}"></output-string> `
               }
             })
             .join("")}
         </div>
-      </node-body>
+      </div>
     `
-    const host = this
-    await Promise.all(imports.map((js) => import(js)))
-    this.innerHTML += innerHTML
 
-    this.querySelector("form").addEventListener("submit", (event) => {
-      console.log(event)
-    })
-
-    this.#node = host.querySelector("node-container")
-    this.#header = host.querySelector(".header")
-    this.#header.addEventListener("move", this.#handleMove)
-    this.addEventListener("change", (event) => {
-      console.log(event.target)
-    })
+    this.querySelector("form").addEventListener("submit", (event) => {})
     this.addEventListener("touchstart", (event) => {
       if (event.touches.length === 1) {
-        // event.preventDefault()
         const target = event.touches[0]
         let initialX = target.clientX
         let initialY = target.clientY
@@ -120,7 +103,6 @@ class Node extends HTMLElement {
         let deltaY = currentY - initialY
         this.style.setProperty("--x", +this.style.getPropertyValue("--x") + deltaX)
         this.style.setProperty("--y", +this.style.getPropertyValue("--y") + deltaY)
-        // this.dispatchEvent(new CustomEvent("move", { detail: { x: deltaX, y: deltaY } }))
         initialX = currentX
         initialY = currentY
       }
@@ -132,22 +114,13 @@ class Node extends HTMLElement {
       document.addEventListener("mouseup", stopElement)
     })
   }
-  #handleMove = (event) => {
-    this.#node.left += event.detail.x
-    this.#node.top += event.detail.y
+  positionSave = () => {
     this.#state.position = {
       x: this.#node.left,
       y: this.#node.top,
     }
     localStorage.setItem(this.getAttribute("id"), JSON.stringify(this.#state))
   }
-  #handlePreview = (event) => {
-    this.#state.preview = this.#previewWindow.preview = event.target.preview
-    localStorage.setItem(this.getAttribute("id"), JSON.stringify(this.#state))
-  }
-  disconnectedCallback() {
-    this.#header.removeEventListener("move", this.#handleMove)
-    if (this.#previewButton) this.#previewButton.removeEventListener("togglePreview", this.#handlePreview)
-  }
+  disconnectedCallback() {}
 }
 customElements.define("node-component", Node)
