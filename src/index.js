@@ -1,46 +1,28 @@
 import { i18n } from "./utils.js"
-import "./elements/ButtonSettings.js"
 import "./output/String.js"
 import "./input/FileDevice.js"
 
 const html = String.raw
 class Node extends HTMLElement {
-  /** @type {HTMLElement} */ #node
-  /** @type {HTMLElement} */ #header
-  /** @type {HTMLElement|undefined} */ #previewWindow
-  /** @type {HTMLElement|undefined} */ #previewButton
-  #state
   constructor() {
     super()
-    const snapshot = localStorage.getItem(this.getAttribute("id"))
-    this.#state = snapshot
-      ? JSON.parse(snapshot)
-      : {
-          preview: false,
-          size: {
-            width: 400,
-          },
-          position: {
-            x: 0,
-            y: 0,
-          },
-        }
   }
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
-    this.style.setProperty("--x", this.#state.position.x)
-    this.style.setProperty("--y", this.#state.position.y)
-    this.style.setProperty("--width", this.#state.size.width)
-
+    const snapshot = localStorage.getItem(this.getAttribute("id"))
+    let previewVisible = false
+    if (snapshot) {
+      const state = JSON.parse(snapshot)
+      previewVisible = state.preview
+      this.style.left = state.position.x + "px"
+      this.style.top = state.position.y + "px"
+    }
     this.innerHTML = html`
       <div class="preview"></div>
       <div class="header">
         <h1 class="no-select">${i18n(schema.title)}</h1>
-        <form onsubmit="return false">
-          <button
-            name="preview-toggle"
-            value=${this.#state.preview ? "hidden" : "visible"}
-            onclick="this.value = this.value === 'hidden' ? 'visible' : 'hidden'"></button>
+        <form onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+          <button name="preview-toggle" value=${previewVisible ? "visible" : "hidden"}></button>
         </form>
       </div>
       <div class="body">
@@ -66,61 +48,64 @@ class Node extends HTMLElement {
         </div>
       </div>
     `
-
-    this.querySelector("form").addEventListener("submit", (event) => {})
-    this.addEventListener("touchstart", (event) => {
-      if (event.touches.length === 1) {
-        const target = event.touches[0]
-        let initialX = target.clientX
-        let initialY = target.clientY
-
-        const moveElement = (event) => {
-          const target = event.touches[0]
-          let currentX = target.clientX
-          let currentY = target.clientY
-          let deltaX = currentX - initialX
-          let deltaY = currentY - initialY
-          this.style.setProperty("--x", +this.style.getPropertyValue("--x") + deltaX)
-          this.style.setProperty("--y", +this.style.getPropertyValue("--y") + deltaY)
-          initialX = currentX
-          initialY = currentY
-        }
-        function stopElement(event) {
-          document.removeEventListener("touchmove", moveElement)
-          document.removeEventListener("touchend", stopElement)
-        }
-        document.addEventListener("touchmove", moveElement)
-        document.addEventListener("touchend", stopElement)
-      }
-    })
-    this.addEventListener("mousedown", (event) => {
-      let initialX = event.clientX
-      let initialY = event.clientY
-      const moveElement = (event) => {
-        let currentX = event.clientX
-        let currentY = event.clientY
-        let deltaX = currentX - initialX
-        let deltaY = currentY - initialY
-        this.style.setProperty("--x", +this.style.getPropertyValue("--x") + deltaX)
-        this.style.setProperty("--y", +this.style.getPropertyValue("--y") + deltaY)
-        initialX = currentX
-        initialY = currentY
-      }
-      function stopElement(event) {
-        document.removeEventListener("mousemove", moveElement)
-        document.removeEventListener("mouseup", stopElement)
-      }
-      document.addEventListener("mousemove", moveElement)
-      document.addEventListener("mouseup", stopElement)
-    })
+    this.querySelector("form").addEventListener("submit", this.handleHeaderForm)
+    this.querySelector(".header").addEventListener("touchstart", this.handleMoveTouch)
+    this.querySelector(".header").addEventListener("mousedown", this.handleMoveMouse)
   }
-  positionSave = () => {
-    this.#state.position = {
-      x: this.#node.left,
-      y: this.#node.top,
+  disconnectedCallback() {
+    this.querySelector("form").removeEventListener("submit", this.handleHeaderForm)
+    this.querySelector(".header").removeEventListener("touchstart", this.handleMoveTouch)
+    this.querySelector(".header").removeEventListener("mousedown", this.handleMoveMouse)
+  }
+  positionUpdate = (deltaX, deltaY) => {
+    if (deltaX !== 0) this.style.left = this.offsetLeft + deltaX + "px"
+    if (deltaY !== 0) this.style.top = this.offsetTop + deltaY + "px"
+  }
+  widthUpdate = () => {}
+  previewUpdate = (element) => {
+    element.value = element.value === "visible" ? "hidden" : "visible"
+  }
+  handleHeaderForm = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    switch (event.submitter.name) {
+      case "preview-toggle":
+        this.previewUpdate(event.submitter)
     }
-    localStorage.setItem(this.getAttribute("id"), JSON.stringify(this.#state))
   }
-  disconnectedCallback() {}
+  handleMoveMouse = (event) => {
+    event.stopPropagation()
+    let initialX = event.clientX
+    let initialY = event.clientY
+    const moveElement = (event) => {
+      this.positionUpdate(event.clientX - initialX, event.clientY - initialY)
+      initialX = event.clientX
+      initialY = event.clientY
+    }
+    function stopElement() {
+      document.removeEventListener("mousemove", moveElement)
+      document.removeEventListener("mouseup", stopElement)
+    }
+    document.addEventListener("mousemove", moveElement)
+    document.addEventListener("mouseup", stopElement)
+  }
+  handleMoveTouch = (event) => {
+    if (event.touches.length === 1) {
+      event.stopPropagation()
+      let initialX = event.touches[0].clientX
+      let initialY = event.touches[0].clientY
+      const moveElement = (event) => {
+        this.positionUpdate(event.touches[0].clientX - initialX, event.touches[0].clientY - initialY)
+        initialX = event.touches[0].clientX
+        initialY = event.touches[0].clientY
+      }
+      function stopElement() {
+        document.removeEventListener("touchmove", moveElement)
+        document.removeEventListener("touchend", stopElement)
+      }
+      document.addEventListener("touchmove", moveElement)
+      document.addEventListener("touchend", stopElement)
+    }
+  }
 }
 customElements.define("node-component", Node)
