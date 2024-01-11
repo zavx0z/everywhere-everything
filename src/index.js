@@ -42,6 +42,7 @@ class Node extends HTMLElement {
                       <input type="text" disabled name="${key}" placeholder="${title}" />
                       <button name="open-file" title="open"></button>
                     </div>
+                    <div class="resize"></div>
                   </div>
                 `
             }
@@ -54,8 +55,9 @@ class Node extends HTMLElement {
               case "string":
                 return html`
                   <div class="output">
-                    <div class="port"></div>
+                    <div class="resize"></div>
                     <p class="no-select">${title}</p>
+                    <div class="port"></div>
                   </div>
                 `
             }
@@ -67,17 +69,34 @@ class Node extends HTMLElement {
     this.querySelector("form").addEventListener("submit", this.handleHeaderForm)
     this.querySelector(".header").addEventListener("touchstart", this.handleMoveTouch)
     this.querySelector(".header").addEventListener("mousedown", this.handleMoveMouse)
+    this.querySelector(".body").addEventListener("touchstart", this.handleResizeTouch)
+    this.querySelector(".body").addEventListener("mousedown", this.handleResizeMouse)
   }
   disconnectedCallback() {
     this.querySelector("form").removeEventListener("submit", this.handleHeaderForm)
     this.querySelector(".header").removeEventListener("touchstart", this.handleMoveTouch)
     this.querySelector(".header").removeEventListener("mousedown", this.handleMoveMouse)
+    this.querySelector(".body").removeEventListener("touchstart", this.handleResizeTouch)
+    this.querySelector(".body").removeEventListener("mousedown", this.handleResizeMouse)
   }
   positionUpdate = (deltaX, deltaY) => {
     if (deltaX !== 0) this.style.left = this.offsetLeft + deltaX + "px"
     if (deltaY !== 0) this.style.top = this.offsetTop + deltaY + "px"
   }
-  widthUpdate = () => {}
+  widthUpdate = (side, deltaX, minWidth) => {
+    if (deltaX !== 0) {
+      if (side === "left") {
+        const width = this.offsetWidth - deltaX
+        if (width > minWidth) {
+          this.style.left = this.offsetLeft + deltaX + "px"
+          this.style.width = width + "px"
+        }
+      } else if (side === "right") {
+        const width = this.offsetWidth + deltaX
+        if (width > minWidth) this.style.width = width + "px"
+      }
+    }
+  }
   previewUpdate = (element) => {
     element.value = element.value === "visible" ? "hidden" : "visible"
   }
@@ -88,6 +107,40 @@ class Node extends HTMLElement {
       case "preview":
         this.previewUpdate(event.submitter)
     }
+  }
+  handleResizeMouse = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    let initialX = event.clientX
+    const side = event.target.parentElement.className === "input" ? "right" : "left"
+    const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
+    const moveElement = (event) => {
+      this.widthUpdate(side, event.clientX - initialX, minWidth)
+      initialX = event.clientX
+    }
+    function stopElement() {
+      document.removeEventListener("mousemove", moveElement)
+      document.removeEventListener("mouseup", stopElement)
+    }
+    document.addEventListener("mousemove", moveElement)
+    document.addEventListener("mouseup", stopElement)
+  }
+  handleResizeTouch = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    let initialX = event.touches[0].clientX
+    const side = event.touches[0].target.parentElement.className === "input" ? "right" : "left"
+    const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
+    const moveElement = (event) => {
+      this.widthUpdate(side, event.touches[0].clientX - initialX, minWidth)
+      initialX = event.touches[0].clientX
+    }
+    function stopElement() {
+      document.removeEventListener("touchmove", moveElement)
+      document.removeEventListener("touchend", stopElement)
+    }
+    document.addEventListener("touchmove", moveElement)
+    document.addEventListener("touchend", stopElement)
   }
   handleMoveMouse = (event) => {
     event.stopPropagation()
