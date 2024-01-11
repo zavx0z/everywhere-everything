@@ -109,38 +109,42 @@ class Node extends HTMLElement {
     }
   }
   handleResizeMouse = (event) => {
-    event.preventDefault()
-    event.stopPropagation()
-    let initialX = event.clientX
-    const side = event.target.parentElement.className === "input" ? "right" : "left"
-    const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
-    const moveElement = (event) => {
-      this.widthUpdate(side, event.clientX - initialX, minWidth)
-      initialX = event.clientX
+    if (event.target.className === "resize") {
+      event.preventDefault()
+      event.stopPropagation()
+      let initialX = event.clientX
+      const side = event.target.parentElement.className === "input" ? "right" : "left"
+      const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
+      const moveElement = (event) => {
+        this.widthUpdate(side, event.clientX - initialX, minWidth)
+        initialX = event.clientX
+      }
+      function stopElement() {
+        document.removeEventListener("mousemove", moveElement)
+        document.removeEventListener("mouseup", stopElement)
+      }
+      document.addEventListener("mousemove", moveElement)
+      document.addEventListener("mouseup", stopElement)
     }
-    function stopElement() {
-      document.removeEventListener("mousemove", moveElement)
-      document.removeEventListener("mouseup", stopElement)
-    }
-    document.addEventListener("mousemove", moveElement)
-    document.addEventListener("mouseup", stopElement)
   }
   handleResizeTouch = (event) => {
-    event.preventDefault()
-    event.stopPropagation()
-    let initialX = event.touches[0].clientX
-    const side = event.touches[0].target.parentElement.className === "input" ? "right" : "left"
-    const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
-    const moveElement = (event) => {
-      this.widthUpdate(side, event.touches[0].clientX - initialX, minWidth)
-      initialX = event.touches[0].clientX
+    if (event.touches[0].target.className === "resize") {
+      event.preventDefault()
+      event.stopPropagation()
+      let initialX = event.touches[0].clientX
+      const side = event.touches[0].target.parentElement.className === "input" ? "right" : "left"
+      const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
+      const moveElement = (event) => {
+        this.widthUpdate(side, event.touches[0].clientX - initialX, minWidth)
+        initialX = event.touches[0].clientX
+      }
+      function stopElement() {
+        document.removeEventListener("touchmove", moveElement)
+        document.removeEventListener("touchend", stopElement)
+      }
+      document.addEventListener("touchmove", moveElement)
+      document.addEventListener("touchend", stopElement)
     }
-    function stopElement() {
-      document.removeEventListener("touchmove", moveElement)
-      document.removeEventListener("touchend", stopElement)
-    }
-    document.addEventListener("touchmove", moveElement)
-    document.addEventListener("touchend", stopElement)
   }
   handleMoveMouse = (event) => {
     event.stopPropagation()
