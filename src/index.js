@@ -9,6 +9,7 @@ const html = String.raw
 class Node extends HTMLElement {
   constructor() {
     super()
+    this.preview = this.innerHTML
   }
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
@@ -22,7 +23,9 @@ class Node extends HTMLElement {
     }
     this.innerHTML = html`
       <div class="header">
-        <div class="preview"></div>
+        <div class="preview no-select" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+          <div>${this.preview}</div>
+        </div>
         <h1 class="no-select">${i18n(schema.title)}</h1>
         <form onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
           <button name="preview" value=${previewVisible ? "visible" : "hidden"}></button>
