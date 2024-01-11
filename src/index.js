@@ -10,6 +10,7 @@ class Node extends HTMLElement {
   constructor() {
     super()
     this.preview = this.innerHTML
+    this.style.setProperty("--minWidth", 350)
   }
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
@@ -20,6 +21,10 @@ class Node extends HTMLElement {
       previewVisible = state.preview
       this.style.left = state.position.x + "px"
       this.style.top = state.position.y + "px"
+    } else {
+      previewVisible = true
+      this.style.left = "11px"
+      this.style.top = "222px"
     }
     this.innerHTML = html`
       <div class="header">
@@ -27,60 +32,68 @@ class Node extends HTMLElement {
           <div>${this.preview}</div>
         </div>
         <h1 class="no-select">${i18n(schema.title)}</h1>
-        <form onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+        <form name="header-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
           <button name="preview" value=${previewVisible ? "visible" : "hidden"}></button>
           <button name="settings"></button>
         </form>
       </div>
       <div class="body">
-        ${Object.entries(schema.input)
-          .map(([key, value]) => {
-            const title = i18n(value.title)
-            switch (value.type) {
-              case "string":
-                return html`
-                  <div class="input">
-                    <div class="port"></div>
-                    <div class="file-device">
-                      <input type="text" disabled name="${key}" placeholder="${title}" />
-                      <button name="open-file" title="open"></button>
+        <form name="input">
+          ${Object.entries(schema.input)
+            .map(([key, value]) => {
+              const title = i18n(value.title)
+              switch (value.type) {
+                case "string":
+                  return html`
+                    <div>
+                      <div class="port"></div>
+                      <div class="file-device">
+                        <input type="text" disabled name="${key}" placeholder="${title}" />
+                        <button name="open-file" title="open"></button>
+                      </div>
+                      <div class="resize"></div>
                     </div>
-                    <div class="resize"></div>
-                  </div>
-                `
-            }
-          })
-          .join("")}
-        ${Object.entries(schema.output)
-          .map(([key, value]) => {
-            const title = i18n(value.title)
-            switch (value.type) {
-              case "string":
-                return html`
-                  <div class="output">
-                    <div class="resize"></div>
-                    <p class="no-select">${title}</p>
-                    <div class="port"></div>
-                  </div>
-                `
-            }
-          })
-          .join("")}
+                  `
+              }
+            })
+            .join("")}
+        </form>
+        <form name="output">
+          ${Object.entries(schema.output)
+            .map(([key, value]) => {
+              const title = i18n(value.title)
+              switch (value.type) {
+                case "string":
+                  return html`
+                    <div>
+                      <div class="resize"></div>
+                      <p class="no-select">${title}</p>
+                      <div class="port"></div>
+                    </div>
+                  `
+              }
+            })
+            .join("")}
+        </form>
       </div>
     `
     this.style.opacity = 1
-    this.querySelector("form").addEventListener("submit", this.handleHeaderForm)
+    this.querySelector("form[name='header-panel']").addEventListener("submit", this.handleFormHeader)
     this.querySelector(".header").addEventListener("touchstart", this.handleMoveTouch)
     this.querySelector(".header").addEventListener("mousedown", this.handleMoveMouse)
     this.querySelector(".body").addEventListener("touchstart", this.handleResizeTouch)
     this.querySelector(".body").addEventListener("mousedown", this.handleResizeMouse)
+    this.querySelector("form[name='input']").addEventListener("submit", this.handleFormInput)
+    this.querySelector("form[name='output']").addEventListener("submit", this.handleFormOutput)
   }
   disconnectedCallback() {
-    this.querySelector("form").removeEventListener("submit", this.handleHeaderForm)
+    this.querySelector("form[name='header-panel']").removeEventListener("submit", this.handleFormHeader)
     this.querySelector(".header").removeEventListener("touchstart", this.handleMoveTouch)
     this.querySelector(".header").removeEventListener("mousedown", this.handleMoveMouse)
     this.querySelector(".body").removeEventListener("touchstart", this.handleResizeTouch)
     this.querySelector(".body").removeEventListener("mousedown", this.handleResizeMouse)
+    this.querySelector("form[name='input']").removeEventListener("submit", this.handleFormInput)
+    this.querySelector("form[name='output']").removeEventListener("submit", this.handleFormOutput)
   }
   positionUpdate = (deltaX, deltaY) => {
     if (deltaX !== 0) this.style.left = this.offsetLeft + deltaX + "px"
@@ -103,7 +116,29 @@ class Node extends HTMLElement {
   previewUpdate = (element) => {
     element.value = element.value === "visible" ? "hidden" : "visible"
   }
-  handleHeaderForm = (event) => {
+  handleFormInput = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    switch (event.submitter.name) {
+      case "open-file":
+        console.log("open file")
+        break
+      default:
+        break
+    }
+  }
+  handleFormOutput = (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    switch (event.submitter.name) {
+      case "open-file":
+        break
+      default:
+        console.log(event)
+        break
+    }
+  }
+  handleFormHeader = (event) => {
     event.preventDefault()
     event.stopPropagation()
     switch (event.submitter.name) {
@@ -116,7 +151,7 @@ class Node extends HTMLElement {
       event.preventDefault()
       event.stopPropagation()
       let initialX = event.clientX
-      const side = event.target.parentElement.className === "input" ? "right" : "left"
+      const side = event.target.parentElement.parentElement.name === "input" ? "right" : "left"
       const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
       const moveElement = (event) => {
         this.widthUpdate(side, event.clientX - initialX, minWidth)
@@ -135,7 +170,7 @@ class Node extends HTMLElement {
       event.preventDefault()
       event.stopPropagation()
       let initialX = event.touches[0].clientX
-      const side = event.touches[0].target.parentElement.className === "input" ? "right" : "left"
+      const side = event.touches[0].target.parentElement.parentElement.name === "input" ? "right" : "left"
       const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
       const moveElement = (event) => {
         this.widthUpdate(side, event.touches[0].clientX - initialX, minWidth)
