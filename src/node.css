@@ -1,5 +1,7 @@
 node-component {
   --border-radius: 0.375rem;
+  opacity: 0;
+  transition: opacity 0.1s ease-in;
   min-width: 250px;
   position: absolute;
   display: grid;
@@ -10,73 +12,6 @@ node-component {
   box-shadow: 0px 3px 5px 4px rgba(15, 23, 42, 0.8);
   z-index: 4;
 
-  & .preview {
-    display: flex;
-    position: absolute;
-    width: calc(100% - var(--border-radius) * 2);
-    left: var(--border-radius);
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-    border-style: solid;
-    border-width: 2px 2px 0 2px;
-    box-sizing: border-box;
-    border-color: rgb(15, 23, 42);
-    bottom: 100%;
-    aspect-ratio: 16 / 9;
-    z-index: 4;
-    padding: 0.2rem;
-    transition: opacity 0.1s ease-in-out;
-
-    &:has(+ .header button[name="preview-toggle"][value="visible"]) {
-      opacity: 1;
-    }
-    &:has(+ .header button[name="preview-toggle"][value="hidden"]) {
-      opacity: 0;
-    }
-
-    &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      filter: blur(3px);
-      z-index: -1;
-      background-color: var(--surface-500);
-    }
-
-    &::after {
-      --size: 14px;
-      content: "";
-      position: relative;
-      width: 100%;
-      height: 100%;
-      border: 2px;
-      border-color: var(--surface-800);
-      border-style: solid;
-      background-image: linear-gradient(
-          45deg,
-          var(--surface-800) 25%,
-          transparent 25%,
-          transparent 75%,
-          var(--surface-800) 75%,
-          var(--surface-800)
-        ),
-        linear-gradient(
-          45deg,
-          var(--surface-800) 25%,
-          transparent 25%,
-          transparent 75%,
-          var(--surface-800) 75%,
-          var(--surface-800)
-        );
-      /* Размер ячеек сетки */
-      background-size: var(--size) var(--size);
-      /* Смещение для создания эффекта шахматной доски */
-      background-position: 0 0, calc(var(--size) / 2) calc(var(--size) / 2);
-      border-radius: calc(var(--border-radius) / 2);
-    }
-  }
   & .header {
     position: relative;
     display: grid;
@@ -87,6 +22,74 @@ node-component {
     border-radius: var(--border-radius) var(--border-radius) 0 0;
     padding: 0 0.5rem;
     background-color: var(--secondary-900);
+
+    & .preview {
+      display: flex;
+      position: absolute;
+      width: calc(100% - var(--border-radius) * 2);
+      left: var(--border-radius);
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+      border-style: solid;
+      border-width: 2px 2px 0 2px;
+      box-sizing: border-box;
+      border-color: rgb(15, 23, 42);
+      bottom: 100%;
+      aspect-ratio: 16 / 9;
+      z-index: 4;
+      padding: 0.2rem;
+      transition: opacity 0.1s ease-in-out;
+
+      &:has(~ form button[name="preview"][value="visible"]) {
+        opacity: 1;
+      }
+      &:has(~ form button[name="preview"][value="hidden"]) {
+        opacity: 0;
+      }
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        filter: blur(3px);
+        z-index: -1;
+        background-color: var(--surface-500);
+      }
+
+      &::after {
+        --size: 14px;
+        content: "";
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border: 2px;
+        border-color: var(--surface-800);
+        border-style: solid;
+        background-image: linear-gradient(
+            45deg,
+            var(--surface-800) 25%,
+            transparent 25%,
+            transparent 75%,
+            var(--surface-800) 75%,
+            var(--surface-800)
+          ),
+          linear-gradient(
+            45deg,
+            var(--surface-800) 25%,
+            transparent 25%,
+            transparent 75%,
+            var(--surface-800) 75%,
+            var(--surface-800)
+          );
+        /* Размер ячеек сетки */
+        background-size: var(--size) var(--size);
+        /* Смещение для создания эффекта шахматной доски */
+        background-position: 0 0, calc(var(--size) / 2) calc(var(--size) / 2);
+        border-radius: calc(var(--border-radius) / 2);
+      }
+    }
 
     & h1 {
       display: inline;
@@ -102,103 +105,143 @@ node-component {
     & form {
       display: flex;
       align-items: center;
-      gap: 10px;
-
       & button {
-        background-color: transparent;
-        border: none;
-        outline: none;
-        &::before {
-          display: block;
-          content: " ";
-          -webkit-mask-size: cover;
-          mask-size: cover;
-          -webkit-mask-image: var(--url);
-          mask-image: var(--url);
-          width: 22px;
-          height: 22px;
+        border-radius: 9999px;
+      }
+      & button[name="preview"] {
+        &[value="visible"]::before {
+          --url: url('data:image/svg+xml;utf8,<svg width="22" height="22" viewBox="426.004 433 12.9912 9.00195" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M432.5 433C429.222 432.999 427.464 435.721 426.136 437.162C425.96 437.354 425.96 437.648 426.136 437.84C427.464 439.281 429.222 442 432.5 442.002C435.778 442.004 437.536 439.281 438.863 437.84C439.039 437.648 439.039 437.354 438.863 437.162C437.535 435.721 435.777 433.001 432.5 433ZM432.5 434C434.433 434 436 435.567 436 437.5C436 439.433 434.433 441 432.5 441C430.567 441 429 439.433 429 437.5C429 435.567 430.567 434 432.5 434ZM432.5 436C431.671 436 431 436.672 431 437.5C431 438.328 431.671 439 432.5 439C433.328 439 434 438.328 434 437.5C434 436.672 433.328 436 432.5 436Z"/></svg>');
+          background-color: var(--primary-200);
         }
-        &[name="preview-toggle"] {
-          &[value="visible"]::before {
-            --url: url('data:image/svg+xml;utf8,<svg width="22" height="22" viewBox="426.004 433 12.9912 9.00195" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M432.5 433C429.222 432.999 427.464 435.721 426.136 437.162C425.96 437.354 425.96 437.648 426.136 437.84C427.464 439.281 429.222 442 432.5 442.002C435.778 442.004 437.536 439.281 438.863 437.84C439.039 437.648 439.039 437.354 438.863 437.162C437.535 435.721 435.777 433.001 432.5 433ZM432.5 434C434.433 434 436 435.567 436 437.5C436 439.433 434.433 441 432.5 441C430.567 441 429 439.433 429 437.5C429 435.567 430.567 434 432.5 434ZM432.5 436C431.671 436 431 436.672 431 437.5C431 438.328 431.671 439 432.5 439C433.328 439 434 438.328 434 437.5C434 436.672 433.328 436 432.5 436Z"/></svg>');
-            background-color: var(--primary-200);
-          }
-          &[value="hidden"]::before {
-            --url: url('data:image/svg+xml;utf8,<svg width="22" height="22" viewBox="405.032 436.999 12.9633 1" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M405.502 437C405.308 437.012 405.138 437.135 405.067 437.316C404.996 437.497 405.036 437.703 405.17 437.844C406.494 439.282 408.252 442.002 411.515 442.002C414.779 442.002 416.539 439.282 417.863 437.844C418.05 437.64 418.037 437.324 417.834 437.137C417.63 436.95 417.314 436.963 417.127 437.166C415.691 438.725 414.221 441.002 411.515 441.002C408.81 441.002 407.34 438.725 405.904 437.166C405.802 437.052 405.654 436.991 405.502 437Z"/></svg>');
-            background-color: var(--primary-200);
-          }
+        &[value="hidden"]::before {
+          --url: url('data:image/svg+xml;utf8,<svg width="22" height="22" viewBox="405.032 436.999 12.9633 1" version="1.1" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M405.502 437C405.308 437.012 405.138 437.135 405.067 437.316C404.996 437.497 405.036 437.703 405.17 437.844C406.494 439.282 408.252 442.002 411.515 442.002C414.779 442.002 416.539 439.282 417.863 437.844C418.05 437.64 418.037 437.324 417.834 437.137C417.63 436.95 417.314 436.963 417.127 437.166C415.691 438.725 414.221 441.002 411.515 441.002C408.81 441.002 407.34 438.725 405.904 437.166C405.802 437.052 405.654 436.991 405.502 437Z"/></svg>');
+          background-color: var(--primary-200);
         }
+      }
+      & button[name="settings"]::before {
+        --url: url('data:image/svg+xml;utf8,<svg width="22" height="22" viewBox="279 536 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg"> <path fill="currentColor" d="M285 536L284.844 537.906C284.221 538.049 283.767 538.158 283.25 538.5L281.5 537L280 538.5L281.5 540.25C281.158 540.767 281.049 541.221 280.906 541.844L279 542L279 543L279 544L280.906 544.156C281.049 544.779 281.158 545.233 281.5 545.75L280 547.5L281.5 549L283.25 547.5C283.767 547.842 284.221 547.951 284.844 548.094L285 550L286 550L287 550L287.156 548.094C287.779 547.951 288.233 547.842 288.75 547.5L290.5 549L292 547.5L290.5 545.75C290.842 545.233 290.951 544.779 291.094 544.156L293 544L293 543L293 542L291.094 541.844C290.951 541.221 290.842 540.767 290.5 540.25L292 538.5L290.5 537L288.75 538.5C288.233 538.158 287.779 538.049 287.156 537.906L287 536L286 536L285 536ZM286 541C287.116 541 288 541.884 288 543C288 544.116 287.116 545 286 545C284.884 545 284 544.116 284 543C284 541.884 284.884 541 286 541Z" /> </svg>');
+        background-color: var(--primary-200);
       }
     }
   }
   & .body {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 2rem;
+    grid-template-rows: repeat(auto-fill, minmax(28px, auto));
     gap: 0.25rem;
     border-radius: 0 0 var(--border-radius) var(--border-radius);
     padding: 0.5rem 0.75rem;
     z-index: 1;
+    & div.port {
+      --opacity: 0;
+      --color: 14 165 223;
+      position: absolute;
+      height: 24px;
+      width: 24px;
+      border-radius: 9999px;
+      top: 2px;
+      background-color: rgb(var(--color) / var(--opacity));
+      transition: background-color 0.2s ease-in-out;
+      &:hover {
+        --opacity: 0.2;
+      }
+      &::before {
+        content: "";
+        height: 12px;
+        width: 12px;
+        left: 6px;
+        top: 6px;
+        border-radius: 9999px;
+        position: absolute;
+        background-color: rgb(var(--color));
+        outline: solid 1px #020617;
+      }
+    }
+    & .input {
+      position: relative;
+      & .port {
+        left: -24px;
+      }
+      .file-device {
+        display: grid;
+        grid-template-columns: auto max-content;
 
-    & > div {
-      display: grid;
-      grid-template-columns: repeat(1, minmax(0, 1fr));
-      gap: 0.5rem;
-      padding: 0.25rem 0;
-      z-index: 2;
+        & input {
+          caret-color: var(--primary-50);
+          color: var(--primary-50);
+          min-height: 28px;
+          resize: both;
+          appearance: none;
+          white-space: pre-wrap;
+          border-radius: 4px 0 0 4px;
+          background-color: var(--surface-900);
+          padding: 0 0.5rem;
+          border: 1px solid var(--surface-500);
+          transition: opacity 0.1s ease-in-out;
+          box-sizing: border-box;
+          &:hover {
+            background-color: var(--surface-800);
+          }
+          &:focus {
+            background-color: var(--surface-800);
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+          }
+        }
+        & button {
+          &::before {
+            --url: url('data:image/svg+xml;utf8,<svg width="22" height="22" version="1.1" viewBox="363 75 14 13" xmlns="http://www.w3.org/2000/svg"> <path d="M363.5 75C363.224 75 363 75.2239 363 75.5L363 79L377 79L377 77.5C377 77.2239 376.776 77 376.5 77L368 77L368 75.5C368 75.2239 367.776 75 367.5 75L363.5 75Z" /> <path d="M363.5 80C363.224 80 363 80.2239 363 80.5L363 87.5C363 87.7761 363.224 88 363.5 88L376.5 88C376.776 88 377 87.7761 377 87.5L377 80.5C377 80.2239 376.776 80 376.5 80L363.5 80Z" /> </svg>');
+            background-color: var(--primary-200);
+          }
+          background-color: var(--surface-500);
+          border: 1px solid var(--surface-500);
+
+          &:hover {
+            background-color: var(--surface-600);
+          }
+          &:active {
+            background-color: var(--surface-00);
+          }
+          &:last-child {
+            border-radius: 0 4px 4px 0;
+          }
+          & svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--primary-200);
+          }
+          & svg:hover path {
+            fill: var(--primary-50);
+          }
+        }
+      }
+    }
+    & .output {
+      position: relative;
+      & .port {
+        right: -24px;
+      }
+      & p {
+        display: block;
+        margin: 0;
+        text-align: right;
+      }
     }
   }
 }
-
-.port {
-  --port-size: 12px;
-  position: absolute;
-  height: var(--port-size);
-  width: var(--port-size);
-  border-radius: 9999px;
-  background-color: rgb(14 165 223);
-  outline-style: solid;
-  outline-width: 1px;
-  outline-color: #020617;
-  top: 8px;
-
-  & button {
-    --size: 22px;
-    --position: -5px;
-    position: absolute;
-    background-color: transparent;
-    border-radius: 9999px;
-    height: var(--size);
-    width: var(--size);
-    left: var(--position);
-    top: var(--position);
-  }
-
-  output-port& {
-    right: -18px;
-  }
-  input-port& {
-    left: -18px;
-  }
-}
-
 button {
-  padding: 0;
-  /* background-color: transparent; */
+  background-color: transparent;
   border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  & svg {
+  outline: none;
+  padding: 0 4px;
+  &::before {
+    display: block;
+    content: " ";
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    -webkit-mask-image: var(--url);
+    mask-image: var(--url);
     width: 22px;
     height: 22px;
-  }
-  & path {
-    transition: fill 0.1s ease-in-out;
-    fill: var(--primary-200);
-  }
-  &:hover path {
-    fill: var(--primary-50);
   }
 }

@@ -1,7 +1,10 @@
-import { i18n } from "./utils.js"
-import "./output/String.js"
-import "./input/FileDevice.js"
-
+function i18n(param) {
+  if (param && typeof param === "object") {
+    const current = document.documentElement.lang
+    const exist = Object.keys(param)
+    return exist.includes(current) ? param[current] : exist.includes("en") ? param["en"] : param[exist[0]]
+  } else return param
+}
 const html = String.raw
 class Node extends HTMLElement {
   constructor() {
@@ -18,36 +21,49 @@ class Node extends HTMLElement {
       this.style.top = state.position.y + "px"
     }
     this.innerHTML = html`
-      <div class="preview"></div>
       <div class="header">
+        <div class="preview"></div>
         <h1 class="no-select">${i18n(schema.title)}</h1>
         <form onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
-          <button name="preview-toggle" value=${previewVisible ? "visible" : "hidden"}></button>
+          <button name="preview" value=${previewVisible ? "visible" : "hidden"}></button>
+          <button name="settings"></button>
         </form>
       </div>
       <div class="body">
-        <div>
-          ${Object.entries(schema.input)
-            .map(([key, value]) => {
-              switch (value.type) {
-                case "string":
-                  return html` <input-file-device label="${i18n(value.title)}" key="${key}"></input-file-device> `
-              }
-            })
-            .join("")}
-        </div>
-        <div>
-          ${Object.entries(schema.output)
-            .map(([key, value]) => {
-              switch (value.type) {
-                case "string":
-                  return html` <output-string label="${i18n(value.title)}"></output-string> `
-              }
-            })
-            .join("")}
-        </div>
+        ${Object.entries(schema.input)
+          .map(([key, value]) => {
+            const title = i18n(value.title)
+            switch (value.type) {
+              case "string":
+                return html`
+                  <div class="input">
+                    <div class="port"></div>
+                    <div class="file-device">
+                      <input type="text" disabled name="${key}" placeholder="${title}" />
+                      <button name="open-file" title="open"></button>
+                    </div>
+                  </div>
+                `
+            }
+          })
+          .join("")}
+        ${Object.entries(schema.output)
+          .map(([key, value]) => {
+            const title = i18n(value.title)
+            switch (value.type) {
+              case "string":
+                return html`
+                  <div class="output">
+                    <div class="port"></div>
+                    <p class="no-select">${title}</p>
+                  </div>
+                `
+            }
+          })
+          .join("")}
       </div>
     `
+    this.style.opacity = 1
     this.querySelector("form").addEventListener("submit", this.handleHeaderForm)
     this.querySelector(".header").addEventListener("touchstart", this.handleMoveTouch)
     this.querySelector(".header").addEventListener("mousedown", this.handleMoveMouse)
@@ -69,7 +85,7 @@ class Node extends HTMLElement {
     event.preventDefault()
     event.stopPropagation()
     switch (event.submitter.name) {
-      case "preview-toggle":
+      case "preview":
         this.previewUpdate(event.submitter)
     }
   }
@@ -91,6 +107,7 @@ class Node extends HTMLElement {
   }
   handleMoveTouch = (event) => {
     if (event.touches.length === 1) {
+      event.preventDefault()
       event.stopPropagation()
       let initialX = event.touches[0].clientX
       let initialY = event.touches[0].clientY
