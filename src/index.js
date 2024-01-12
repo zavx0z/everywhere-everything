@@ -7,6 +7,22 @@ function i18n(param) {
 }
 const html = String.raw
 class Node extends HTMLElement {
+  get state() {}
+  set state(value) {
+    console.log("state", value)
+    const x = value.position?.x
+    if (x) this.style.left = x + "px"
+
+    const y = value.position?.y
+    if (y) this.style.top = y + "px"
+
+    const width = value.size?.width
+    if (width) this.style.width = width + "px"
+
+    const preview = value.preview
+    if (typeof preview === "boolean")
+      this.querySelector("button[name='preview']").value = preview ? "visible" : "hidden"
+  }
   constructor() {
     super()
     this.preview = this.innerHTML
@@ -15,24 +31,22 @@ class Node extends HTMLElement {
     this.style.width = this.getAttribute("width") + "px"
     this.style.left = this.getAttribute("x") + "px"
     this.style.top = this.getAttribute("y") + "px"
-  }
-  async connectedCallback() {
-    const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
+    const { title, input, output } = this.schema
     const previewVisible = this.getAttribute("preview") === "true"
     this.innerHTML = html`
       <div class="header">
         <div class="preview no-select" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
           <div>${this.preview}</div>
         </div>
-        <h1 class="no-select">${i18n(schema.title)}</h1>
+        <h1 class="no-select">${i18n(title)}</h1>
         <form name="header-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
           <button name="preview" value=${previewVisible ? "visible" : "hidden"}></button>
           <button name="settings"></button>
         </form>
       </div>
       <div class="body">
-        <form name="input">
-          ${Object.entries(schema.input)
+        <form name="input" enctype="multipart/form-data">
+          ${Object.entries(input)
             .map(([key, value]) => {
               const title = i18n(value.title)
               switch (value.type) {
@@ -40,10 +54,7 @@ class Node extends HTMLElement {
                   return html`
                     <div>
                       <div class="port"></div>
-                      <div class="file-device">
-                        <input type="text" disabled name="${key}" placeholder="${title}" />
-                        <button name="open-file" title="open"></button>
-                      </div>
+                      <input type="file" name="${key}" />
                       <div class="resize"></div>
                     </div>
                   `
@@ -51,8 +62,8 @@ class Node extends HTMLElement {
             })
             .join("")}
         </form>
-        <form name="output">
-          ${Object.entries(schema.output)
+        <form name="output" enctype="multipart/form-data">
+          ${Object.entries(output)
             .map(([key, value]) => {
               const title = i18n(value.title)
               switch (value.type) {
@@ -71,14 +82,15 @@ class Node extends HTMLElement {
       </div>
     `
     this.style.opacity = 1
+  }
+  connectedCallback() {
     this.querySelector("form[name='header-panel']").addEventListener("submit", this.handleFormHeader)
     this.querySelector(".header").addEventListener("touchstart", this.handleMoveTouch)
     this.querySelector(".header").addEventListener("mousedown", this.handleMoveMouse)
     this.querySelector(".body").addEventListener("touchstart", this.handleResizeTouch)
     this.querySelector(".body").addEventListener("mousedown", this.handleResizeMouse)
-    this.querySelector("form[name='input']").addEventListener("submit", this.handleFormInput)
+    this.querySelector("form[name='input']").addEventListener("change", this.handleFormInput)
     this.querySelector("form[name='output']").addEventListener("submit", this.handleFormOutput)
-    this.channel.addEventListener("message", this.handleMessage)
   }
   disconnectedCallback() {
     this.querySelector("form[name='header-panel']").removeEventListener("submit", this.handleFormHeader)
@@ -86,9 +98,16 @@ class Node extends HTMLElement {
     this.querySelector(".header").removeEventListener("mousedown", this.handleMoveMouse)
     this.querySelector(".body").removeEventListener("touchstart", this.handleResizeTouch)
     this.querySelector(".body").removeEventListener("mousedown", this.handleResizeMouse)
-    this.querySelector("form[name='input']").removeEventListener("submit", this.handleFormInput)
+    this.querySelector("form[name='input']").removeEventListener("change", this.handleFormInput)
     this.querySelector("form[name='output']").removeEventListener("submit", this.handleFormOutput)
-    this.channel.removeEventListener("message", this.handleMessage)
+  }
+  #subscribers = []
+  subscribe(callback) {
+    this.#subscribers.push(callback)
+    return () => this.#subscribers.unshift(callback)
+  }
+  emit(data) {
+    this.#subscribers.forEach((callback) => callback(data))
   }
   updatePosition = (deltaX, deltaY) => {
     if (deltaX !== 0 && deltaY !== 0) {
@@ -96,15 +115,15 @@ class Node extends HTMLElement {
       const positionY = this.offsetTop + deltaY
       this.style.left = positionX + "px"
       this.style.top = positionY + "px"
-      this.channel.postMessage({ position: { x: positionX, y: positionY } })
+      this.emit({ position: { x: positionX, y: positionY } })
     } else if (deltaX !== 0) {
       const positionX = this.offsetLeft + deltaX
       this.style.left = positionX + "px"
-      this.channel.postMessage({ position: { x: positionX } })
+      this.emit({ position: { x: positionX } })
     } else if (deltaY !== 0) {
       const positionY = this.offsetTop + deltaY
       this.style.top = positionY + "px"
-      this.channel.postMessage({ position: { y: positionY } })
+      this.emit({ position: { y: positionY } })
     }
   }
   updateWidth = (side, deltaX, minWidth) => {
@@ -115,20 +134,20 @@ class Node extends HTMLElement {
           const positionX = this.offsetLeft + deltaX
           this.style.left = positionX + "px"
           this.style.width = width + "px"
-          this.channel.postMessage({ position: { x: positionX }, size: { width } })
+          this.emit({ position: { x: positionX }, size: { width } })
         }
       } else if (side === "right") {
         const width = this.offsetWidth + deltaX
         if (width > minWidth) {
           this.style.width = width + "px"
-          this.channel.postMessage({ size: { width } })
+          this.emit({ size: { width } })
         }
       }
     }
   }
   updatePreview = (element) => {
     element.value = element.value === "visible" ? "hidden" : "visible"
-    this.channel.postMessage({ preview: element.value === "visible" })
+    this.emit({ preview: element.value === "visible" })
   }
   handleMessage = (event) => {
     const message = event.data
@@ -145,24 +164,30 @@ class Node extends HTMLElement {
   handleFormInput = (event) => {
     event.preventDefault()
     event.stopPropagation()
-    switch (event.submitter.name) {
-      case "open-file":
-        console.log("open file")
-        break
-      default:
-        break
-    }
+    const data = new FormData(event.currentTarget)
+    const input = {}
+    for (let [key, value] of data) input[key] = value
+    this.emit({ input })
+    // switch (event.submitter.name) {
+    //   case "open-file":
+    //     console.log("open file")
+    //     break
+    //   default:
+    //     break
+    // }
   }
   handleFormOutput = (event) => {
     event.preventDefault()
     event.stopPropagation()
-    switch (event.submitter.name) {
-      case "open-file":
-        break
-      default:
-        console.log(event)
-        break
-    }
+    console.log(event)
+
+    // switch (event.submitter.name) {
+    //   case "open-file":
+    //     break
+    //   default:
+    //     console.log(event)
+    //     break
+    // }
   }
   handleFormHeader = (event) => {
     event.preventDefault()
@@ -254,4 +279,4 @@ class Node extends HTMLElement {
     }
   }
 }
-customElements.define("node-component", Node)
+customElements.define("metafor-node", Node)

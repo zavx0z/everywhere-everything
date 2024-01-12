@@ -1,0 +1,36 @@
+/* SOCKETS */
+input[type="file"] {
+  display: inline-block;
+  width: 100%;
+  min-height: 28px;
+  line-height: 28px;
+  text-align: left;
+  color: var(--primary-50);
+  background-color: var(--surface-900);
+  border: 1px solid var(--surface-500);
+  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 0 0 0 0.5rem;
+  &::file-selector-button {
+    float: right;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--surface-500);
+    border-radius: 0 2px 2px 0;
+    box-sizing: border-box;
+    mask-size: cover;
+    mask-image: var(--url);
+    width: 28px;
+    height: 28px;
+    color: transparent;
+    background: url('data:image/svg+xml;utf8,<svg width="22" height="22" fill="%23e1f3fa" version="1.1" viewBox="363 75 14 13" xmlns="http://www.w3.org/2000/svg"> <path d="M363.5 75C363.224 75 363 75.2239 363 75.5L363 79L377 79L377 77.5C377 77.2239 376.776 77 376.5 77L368 77L368 75.5C368 75.2239 367.776 75 367.5 75L363.5 75Z" /> <path d="M363.5 80C363.224 80 363 80.2239 363 80.5L363 87.5C363 87.7761 363.224 88 363.5 88L376.5 88C376.776 88 377 87.7761 377 87.5L377 80.5C377 80.2239 376.776 80 376.5 80L363.5 80Z" /> </svg>')
+      no-repeat center center;
+    background-color: var(--surface-500);
+  }
+  &::file-selector-button:hover {
+    background-color: var(--surface-600);
+  }
+  &::file-selector-button:active {
+    background-color: var(--surface-900);
+  }
+}

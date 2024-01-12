@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="WebComponent Node" />
-    <title>Node</title>
+    <title>MetaFor-Node</title>
     <dev-tools mobile></dev-tools>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="src/node.css" />
+    <link rel="stylesheet" href="src/sockets.css" />
     <script type="module">
       await new Promise((res) =>
         import("https://zavx0z.github.io/dev-tools/index.js")
@@ -17,12 +18,23 @@
             res({ error: err })
           })
       )
-
+      async function getBase64(file) {
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        return new Promise((res, rej) => {
+          reader.onload = function () {
+            return res(reader.result)
+          }
+          reader.onerror = function (error) {
+            return rej("Error: ", error)
+          }
+        })
+      }
       function initState(id) {
         const state = localStorage.getItem(id)
         const snapshot = state
           ? JSON.parse(state)
-          : { position: { x: 11, y: 222 }, size: { width: 350 }, preview: true }
+          : { position: { x: 11, y: 222 }, size: { width: 350 }, preview: true, input: {} }
         localStorage.setItem(id, JSON.stringify(snapshot))
         return snapshot
       }
@@ -37,27 +49,52 @@
         localStorage.setItem(id, JSON.stringify(newState))
       }
 
-      await import("./src/index.js")
-      const nodeID = "example-id"
+      const deviceID = "device-id"
+      const channel = new BroadcastChannel(deviceID)
+
+      const nodeID = "node-id"
+      const schemaURI = "example/schema.json"
+      const nodeURI = "./src/index.js"
+
+      const load = (schemaURI, nodeURI) => Promise.all([fetch(schemaURI).then((data) => data.json()), import(nodeURI)])
+      const [schema] = await load(schemaURI, "./src/index.js")
+
       const state = initState(nodeID)
       const template = document.createElement("template")
       template.innerHTML = /*html*/ `
-      <node-component 
+      <metafor-node
         id="${nodeID}"
-        schema="example/schema.json"
         x="${state.position.x}"
         y="${state.position.y}"
         width="${state.size.width}"
         preview="${state.preview}"
       >
         <h1>Preview</h1>
-      </node-component>    
+      </metafor-node>
       `
-      template.content.state = state
+
+      const node = template.content.firstElementChild
+      node.schema = schema
       document.body.append(template.content)
-      const channel = new BroadcastChannel(nodeID)
+      const unsubscribe = node.subscribe(async (data) => {
+        if (Object.keys(data).includes("input")) {
+          const base64 = await getBase64(data.input.filePath)
+          console.log(base64)
+          const image = document.createElement("img")
+          image.src = base64
+          image.style.width = "100%"
+          const previewElement = node.querySelector(".preview > div")
+          console.log(previewElement)
+          previewElement.innerHTML = ''
+          previewElement.append(image)
+        } else {
+          updateState(nodeID, data)
+          channel.postMessage(data)
+        }
+      })
       channel.onmessage = ({ data }) => {
         updateState(nodeID, data)
+        node.state = data
       }
     </script>
   </head>

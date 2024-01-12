@@ -1,4 +1,4 @@
-node-component {
+metafor-node {
   --border-radius: 0.375rem;
   --minWidth: 250;
   opacity: 0;
@@ -40,7 +40,7 @@ node-component {
       bottom: 100%;
       aspect-ratio: 16 / 9;
       z-index: 4;
-      padding: 0.2rem;
+      /* padding: 0.2rem; */
       transition: opacity 0.1s ease-in-out;
       & > div {
         display: flex;
@@ -157,13 +157,6 @@ node-component {
         & .resize {
           right: calc(var(--position) * 1px);
         }
-        & .file-device {
-          display: grid;
-          grid-template-columns: auto max-content;
-          & button::before {
-            --url: url('data:image/svg+xml;utf8,<svg width="22" height="22" version="1.1" viewBox="363 75 14 13" xmlns="http://www.w3.org/2000/svg"> <path d="M363.5 75C363.224 75 363 75.2239 363 75.5L363 79L377 79L377 77.5C377 77.2239 376.776 77 376.5 77L368 77L368 75.5C368 75.2239 367.776 75 367.5 75L363.5 75Z" /> <path d="M363.5 80C363.224 80 363 80.2239 363 80.5L363 87.5C363 87.7761 363.224 88 363.5 88L376.5 88C376.776 88 377 87.7761 377 87.5L377 80.5C377 80.2239 376.776 80 376.5 80L363.5 80Z" /> </svg>');
-          }
-        }
       }
       &[name="output"] {
         & .port {
@@ -201,6 +194,7 @@ button {
     height: 22px;
   }
 }
+
 .body > form {
   & > div {
     position: relative;
@@ -215,17 +209,16 @@ button {
       background-color: var(--surface-600);
     }
     &:active {
-      background-color: var(--surface-00);
+      background-color: var(--surface-900);
     }
     &::before {
       background-color: var(--primary-200);
     }
   }
-  & input {
+  /* & input {
     caret-color: var(--primary-50);
     color: var(--primary-50);
     min-height: 28px;
-    resize: both;
     appearance: none;
     white-space: pre-wrap;
     border-radius: 4px 0 0 4px;
@@ -242,7 +235,7 @@ button {
       outline: 2px solid transparent;
       outline-offset: 2px;
     }
-  }
+  } */
   & div.resize {
     --color: 14 165 223;
     --width: 20;
