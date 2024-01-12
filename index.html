@@ -18,6 +18,10 @@
           })
       )
       import("./src/index.js")
+      const channel = new BroadcastChannel("example-id")
+      channel.onmessage = ({ data }) => {
+        console.log({ ...data })
+      }
     </script>
   </head>
   <body>

@@ -11,6 +11,7 @@ class Node extends HTMLElement {
     super()
     this.preview = this.innerHTML
     this.style.setProperty("--minWidth", 350)
+    this.channel = new BroadcastChannel(this.getAttribute("id"))
   }
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
@@ -85,6 +86,7 @@ class Node extends HTMLElement {
     this.querySelector(".body").addEventListener("mousedown", this.handleResizeMouse)
     this.querySelector("form[name='input']").addEventListener("submit", this.handleFormInput)
     this.querySelector("form[name='output']").addEventListener("submit", this.handleFormOutput)
+    this.channel.addEventListener("message", this.handleMessage)
   }
   disconnectedCallback() {
     this.querySelector("form[name='header-panel']").removeEventListener("submit", this.handleFormHeader)
@@ -94,27 +96,59 @@ class Node extends HTMLElement {
     this.querySelector(".body").removeEventListener("mousedown", this.handleResizeMouse)
     this.querySelector("form[name='input']").removeEventListener("submit", this.handleFormInput)
     this.querySelector("form[name='output']").removeEventListener("submit", this.handleFormOutput)
+    this.channel.removeEventListener("message", this.handleMessage)
   }
-  positionUpdate = (deltaX, deltaY) => {
-    if (deltaX !== 0) this.style.left = this.offsetLeft + deltaX + "px"
-    if (deltaY !== 0) this.style.top = this.offsetTop + deltaY + "px"
+  updatePosition = (deltaX, deltaY) => {
+    if (deltaX !== 0 && deltaY !== 0) {
+      const positionX = this.offsetLeft + deltaX
+      const positionY = this.offsetTop + deltaY
+      this.style.left = positionX + "px"
+      this.style.top = positionY + "px"
+      this.channel.postMessage({ position: { x: positionX, y: positionY } })
+    } else if (deltaX !== 0) {
+      const positionX = this.offsetLeft + deltaX
+      this.style.left = positionX + "px"
+      this.channel.postMessage({ position: { x: positionX } })
+    } else if (deltaY !== 0) {
+      const positionY = this.offsetTop + deltaY
+      this.style.top = positionY + "px"
+      this.channel.postMessage({ position: { y: positionY } })
+    }
   }
-  widthUpdate = (side, deltaX, minWidth) => {
+  updateWidth = (side, deltaX, minWidth) => {
     if (deltaX !== 0) {
       if (side === "left") {
         const width = this.offsetWidth - deltaX
         if (width > minWidth) {
-          this.style.left = this.offsetLeft + deltaX + "px"
+          const positionX = this.offsetLeft + deltaX
+          this.style.left = positionX + "px"
           this.style.width = width + "px"
+          this.channel.postMessage({ position: { x: positionX }, size: { width } })
         }
       } else if (side === "right") {
         const width = this.offsetWidth + deltaX
-        if (width > minWidth) this.style.width = width + "px"
+        if (width > minWidth) {
+          this.style.width = width + "px"
+          this.channel.postMessage({ size: { width } })
+        }
       }
     }
   }
-  previewUpdate = (element) => {
+  updatePreview = (element) => {
     element.value = element.value === "visible" ? "hidden" : "visible"
+    this.channel.postMessage({ preview: element.value === "visible" })
+  }
+  handleMessage = (event) => {
+    const message = event.data
+    switch (message.type) {
+      case "preview":
+        this.querySelector("button[name='preview']").value = message.value ? "visible" : "hidden"
+        break
+      case "input":
+        break
+      case "output":
+        console.log(message)
+    }
   }
   handleFormInput = (event) => {
     event.preventDefault()
@@ -143,42 +177,50 @@ class Node extends HTMLElement {
     event.stopPropagation()
     switch (event.submitter.name) {
       case "preview":
-        this.previewUpdate(event.submitter)
+        this.updatePreview(event.submitter)
     }
   }
   handleResizeMouse = (event) => {
     if (event.target.className === "resize") {
       event.preventDefault()
       event.stopPropagation()
+      event.target.style.setProperty("--opacity", 1)
+      document.body.style.cursor = "col-resize"
       let initialX = event.clientX
       const side = event.target.parentElement.parentElement.name === "input" ? "right" : "left"
       const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
       const moveElement = (event) => {
-        this.widthUpdate(side, event.clientX - initialX, minWidth)
+        this.updateWidth(side, event.clientX - initialX, minWidth)
         initialX = event.clientX
       }
       function stopElement() {
         document.removeEventListener("mousemove", moveElement)
         document.removeEventListener("mouseup", stopElement)
+        event.target.style.setProperty("--opacity", 0)
+        document.body.style.cursor = "default"
+        // event.target.removeEventListener("mouseleave", stopElement)
       }
       document.addEventListener("mousemove", moveElement)
       document.addEventListener("mouseup", stopElement)
+      // event.target.addEventListener("mouseleave", stopElement)
     }
   }
   handleResizeTouch = (event) => {
     if (event.touches[0].target.className === "resize") {
       event.preventDefault()
       event.stopPropagation()
+      event.touches[0].target.style.setProperty("--opacity", 1)
       let initialX = event.touches[0].clientX
       const side = event.touches[0].target.parentElement.parentElement.name === "input" ? "right" : "left"
       const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
       const moveElement = (event) => {
-        this.widthUpdate(side, event.touches[0].clientX - initialX, minWidth)
+        this.updateWidth(side, event.touches[0].clientX - initialX, minWidth)
         initialX = event.touches[0].clientX
       }
       function stopElement() {
         document.removeEventListener("touchmove", moveElement)
         document.removeEventListener("touchend", stopElement)
+        event.touches[0].target.style.setProperty("--opacity", 0)
       }
       document.addEventListener("touchmove", moveElement)
       document.addEventListener("touchend", stopElement)
@@ -189,7 +231,7 @@ class Node extends HTMLElement {
     let initialX = event.clientX
     let initialY = event.clientY
     const moveElement = (event) => {
-      this.positionUpdate(event.clientX - initialX, event.clientY - initialY)
+      this.updatePosition(event.clientX - initialX, event.clientY - initialY)
       initialX = event.clientX
       initialY = event.clientY
     }
@@ -207,7 +249,7 @@ class Node extends HTMLElement {
       let initialX = event.touches[0].clientX
       let initialY = event.touches[0].clientY
       const moveElement = (event) => {
-        this.positionUpdate(event.touches[0].clientX - initialX, event.touches[0].clientY - initialY)
+        this.updatePosition(event.touches[0].clientX - initialX, event.touches[0].clientY - initialY)
         initialX = event.touches[0].clientX
         initialY = event.touches[0].clientY
       }

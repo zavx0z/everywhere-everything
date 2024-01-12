@@ -138,23 +138,54 @@ node-component {
     }
   }
   & .body {
+    --body-padding-x: 12;
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.25rem;
     border-radius: 0 0 var(--border-radius) var(--border-radius);
-    padding: 0.5rem 0.75rem;
+    padding: 8px calc(var(--body-padding-x) * 1px);
     z-index: 1;
     & form {
       display: grid;
       grid-template-columns: 1fr;
       grid-template-rows: 28px;
       gap: 0.25rem;
+      & div.resize {
+        --color: 14 165 223;
+        --width: 20;
+        --position: calc((var(--width) / 2 + var(--body-padding-x)) * -1);
+        --opacity: 0;
+        position: absolute;
+        width: calc(var(--width) * 1px);
+        height: 34px;
+        top: -4px;
+        border-radius: 9999px;
+        /* background-color: rgb(var(--color) / 0.5); */
+        &::before {
+          --selfWidth: 4;
+          transition: background-color 0.2s ease-in-out;
+          content: "";
+          position: absolute;
+          width: calc(var(--selfWidth) * 1px);
+          height: 28px;
+          top: 3px;
+          left: calc((var(--width) / 2 - var(--selfWidth) / 2) * 1px);
+          border-radius: 9999px;
+          background-color: rgb(var(--color) / var(--opacity));
+        }
+        &:hover {
+          cursor: col-resize;
+        }
+        &:hover::before {
+          background-color: rgb(var(--color));
+        }
+      }
       &[name="input"] {
         & .port {
           left: -24px;
         }
         & .resize {
-          right: -17px;
+          right: calc(var(--position) * 1px);
         }
         & .file-device {
           display: grid;
@@ -169,7 +200,7 @@ node-component {
           right: -24px;
         }
         & .resize {
-          left: -17px;
+          left: calc(var(--position) * 1px);
         }
         & p {
           display: block;
@@ -181,6 +212,9 @@ node-component {
   }
 }
 /* ============= SHARED ============= */
+*:disabled {
+  pointer-events: none;
+}
 button {
   background-color: transparent;
   border: none;
@@ -237,30 +271,6 @@ button {
       background-color: var(--surface-800);
       outline: 2px solid transparent;
       outline-offset: 2px;
-    }
-  }
-  & div.resize {
-    --color: 14 165 223;
-    position: absolute;
-    width: 10px;
-    height: 34px;
-    top: -4px;
-    border-radius: 9999px;
-    /* background-color: rgb(var(--color) / 0.5); */
-    &::before {
-      transition: background-color 0.2s ease-in-out;
-      content: "";
-      position: absolute;
-      width: 4px;
-      height: 28px;
-      top: 3px;
-      left: 3px;
-      border-radius: 9999px;
-      background-color: rgb(var(--color) / var(--opacity));
-    }
-    &:hover {
-      cursor: ew-resize;
-      --opacity: 1;
     }
   }
   & div.port {
