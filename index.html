@@ -17,16 +17,49 @@
             res({ error: err })
           })
       )
-      import("./src/index.js")
-      const channel = new BroadcastChannel("example-id")
+
+      function initState(id) {
+        const state = localStorage.getItem(id)
+        const snapshot = state
+          ? JSON.parse(state)
+          : { position: { x: 11, y: 222 }, size: { width: 350 }, preview: true }
+        localStorage.setItem(id, JSON.stringify(snapshot))
+        return snapshot
+      }
+      function updateState(id, patch) {
+        const state = JSON.parse(localStorage.getItem(id))
+        function upd(state, patch) {
+          for (let key in patch)
+            state[key] = typeof patch[key] === "object" ? upd(state[key], patch[key]) : (state[key] = patch[key])
+          return state
+        }
+        const newState = upd(state, patch)
+        localStorage.setItem(id, JSON.stringify(newState))
+      }
+
+      await import("./src/index.js")
+      const nodeID = "example-id"
+      const state = initState(nodeID)
+      const template = document.createElement("template")
+      template.innerHTML = /*html*/ `
+      <node-component 
+        id="${nodeID}"
+        schema="example/schema.json"
+        x="${state.position.x}"
+        y="${state.position.y}"
+        width="${state.size.width}"
+        preview="${state.preview}"
+      >
+        <h1>Preview</h1>
+      </node-component>    
+      `
+      template.content.state = state
+      document.body.append(template.content)
+      const channel = new BroadcastChannel(nodeID)
       channel.onmessage = ({ data }) => {
-        console.log({ ...data })
+        updateState(nodeID, data)
       }
     </script>
   </head>
-  <body>
-    <node-component id="example-id" schema="example/schema.json">
-      <h1>Preview</h1>
-    </node-component>
-  </body>
+  <body></body>
 </html>

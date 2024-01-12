@@ -10,23 +10,15 @@ class Node extends HTMLElement {
   constructor() {
     super()
     this.preview = this.innerHTML
-    this.style.setProperty("--minWidth", 350)
     this.channel = new BroadcastChannel(this.getAttribute("id"))
+    this.style.setProperty("--minWidth", 350)
+    this.style.width = this.getAttribute("width") + "px"
+    this.style.left = this.getAttribute("x") + "px"
+    this.style.top = this.getAttribute("y") + "px"
   }
   async connectedCallback() {
     const schema = await fetch(this.getAttribute("schema")).then((data) => data.json())
-    const snapshot = localStorage.getItem(this.getAttribute("id"))
-    let previewVisible = false
-    if (snapshot) {
-      const state = JSON.parse(snapshot)
-      previewVisible = state.preview
-      this.style.left = state.position.x + "px"
-      this.style.top = state.position.y + "px"
-    } else {
-      previewVisible = true
-      this.style.left = "11px"
-      this.style.top = "222px"
-    }
+    const previewVisible = this.getAttribute("preview") === "true"
     this.innerHTML = html`
       <div class="header">
         <div class="preview no-select" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
