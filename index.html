@@ -18,18 +18,6 @@
             res({ error: err })
           })
       )
-      async function getBase64(file) {
-        const reader = new FileReader()
-        reader.readAsDataURL(file)
-        return new Promise((res, rej) => {
-          reader.onload = function () {
-            return res(reader.result)
-          }
-          reader.onerror = function (error) {
-            return rej("Error: ", error)
-          }
-        })
-      }
       function initState(id) {
         const state = localStorage.getItem(id)
         const snapshot = state
@@ -52,14 +40,22 @@
       const deviceID = "device-id"
       const channel = new BroadcastChannel(deviceID)
 
+      const URI = "./example/img-base64"
       const nodeID = "node-id"
-      const schemaURI = "example/schema.json"
-      const nodeURI = "./src/index.js"
+      const tag = "metafor-atom"
 
-      const load = (schemaURI, nodeURI) => Promise.all([fetch(schemaURI).then((data) => data.json()), import(nodeURI)])
-      const [schema] = await load(schemaURI, "./src/index.js")
+      const load = (schemaURI, nodeURI) =>
+        Promise.all([
+          fetch(URI + "/schema.json").then((data) => data.json()),
+          import(URI + "/index.js").then((module) => module.default),
+          import("./src/index.js"),
+        ])
+      const [schema, Atom] = await load(URI)
 
       const state = initState(nodeID)
+      const atom = document.createElement(tag)
+      customElements.define(tag, Atom)
+
       const template = document.createElement("template")
       template.innerHTML = /*html*/ `
       <metafor-node
@@ -69,24 +65,17 @@
         width="${state.size.width}"
         preview="${state.preview}"
       >
-        <h1>Preview</h1>
       </metafor-node>
       `
 
       const node = template.content.firstElementChild
       node.schema = schema
       document.body.append(template.content)
-      const unsubscribe = node.subscribe(async (data) => {
+      node.append(atom)
+
+      const unsubscribe = node.subscribe((data) => {
         if (Object.keys(data).includes("input")) {
-          const base64 = await getBase64(data.input.filePath)
-          console.log(base64)
-          const image = document.createElement("img")
-          image.src = base64
-          image.style.width = "100%"
-          const previewElement = node.querySelector(".preview > div")
-          console.log(previewElement)
-          previewElement.innerHTML = ''
-          previewElement.append(image)
+          atom.exec(data.input, { render: true }).then((output) => console.log(output))
         } else {
           updateState(nodeID, data)
           channel.postMessage(data)

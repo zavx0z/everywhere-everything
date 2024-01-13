@@ -23,6 +23,11 @@ class Node extends HTMLElement {
     if (typeof preview === "boolean")
       this.querySelector("button[name='preview']").value = preview ? "visible" : "hidden"
   }
+  append(element) {
+    const preview = this.querySelector(".preview > div")
+    preview.innerHTML = ""
+    preview.append(element)
+  }
   constructor() {
     super()
     this.preview = this.innerHTML

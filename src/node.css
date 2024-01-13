@@ -40,15 +40,17 @@ metafor-node {
       bottom: 100%;
       aspect-ratio: 16 / 9;
       z-index: 4;
-      /* padding: 0.2rem; */
       transition: opacity 0.1s ease-in-out;
       & > div {
         display: flex;
         background-color: var(--surface-800);
         border-radius: calc(var(--border-radius) / 2);
         z-index: 2;
-        padding: 4px;
+        max-width: 100%;
         overflow: hidden;
+        & * {
+          max-width: 100%;
+        }
       }
       &:has(~ form button[name="preview"][value="visible"]) {
         opacity: 1;
