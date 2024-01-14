@@ -75,7 +75,11 @@
 
       const unsubscribe = node.subscribe((data) => {
         if (Object.keys(data).includes("input")) {
-          atom.exec(data.input, { render: true }).then((output) => console.log(output))
+          atom.exec(data.input, { render: true }).then((output) => {
+            for (let [key, value] of Object.entries(output)) {
+              console.log(key, value)
+            }
+          })
         } else {
           updateState(nodeID, data)
           channel.postMessage(data)

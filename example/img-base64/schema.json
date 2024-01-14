@@ -1,14 +1,13 @@
 {
-  "$schema": "https://zavx0z.github.io/node/schema.json#",
+  "$schema": "file:///c:/projects/node/schema.json",
   "title": {
     "en": "Image",
     "ru": "Изображение"
   },
   "description": "Default description without localization",
-  "preview": true,
   "input": {
-    "filePath": {
-      "type": "string",
+    "fileImg": {
+      "type": "file",
       "title": {
         "ru": "Открыть изображение",
         "en": "Open image"
@@ -18,7 +17,7 @@
         "ru": "Описание с локализацией"
       },
       "examples": ["c:\\images\\image.png"],
-      "pattern": "^.*\\.(jpg|jpeg|png|gif|bmp)$"
+      "pattern": "^.*\\.(jpg|jpeg|png)$"
     }
   },
   "output": {
@@ -37,5 +36,13 @@
       "examples": ["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAA"],
       "pattern": "^data:image/.*;base64,.*$"
     }
-  }
+  },
+  "position": {
+    "x": 10,
+    "y": 10
+  },
+  "size": {
+    "width": 100
+  },
+  "preview": true
 }

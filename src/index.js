@@ -46,7 +46,6 @@ class Node extends HTMLElement {
         <h1 class="no-select">${i18n(title)}</h1>
         <form name="header-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
           <button name="preview" value=${previewVisible ? "visible" : "hidden"}></button>
-          <button name="settings"></button>
         </form>
       </div>
       <div class="body">
@@ -55,11 +54,11 @@ class Node extends HTMLElement {
             .map(([key, value]) => {
               const title = i18n(value.title)
               switch (value.type) {
-                case "string":
+                case "file":
                   return html`
                     <div>
                       <div class="port"></div>
-                      <input type="file" name="${key}" />
+                      <input type="file" placeholder="${title}" name="${key}" />
                       <div class="resize"></div>
                     </div>
                   `
@@ -76,8 +75,8 @@ class Node extends HTMLElement {
                   return html`
                     <div>
                       <div class="resize"></div>
-                      <p class="no-select">${title}</p>
-                      <div class="port"></div>
+                      <p>${title}</p>
+                      <div class="port" data-key="${key}"></div>
                     </div>
                   `
               }
@@ -95,7 +94,7 @@ class Node extends HTMLElement {
     this.querySelector(".body").addEventListener("touchstart", this.handleResizeTouch)
     this.querySelector(".body").addEventListener("mousedown", this.handleResizeMouse)
     this.querySelector("form[name='input']").addEventListener("change", this.handleFormInput)
-    this.querySelector("form[name='output']").addEventListener("submit", this.handleFormOutput)
+    this.querySelector("form[name='output']").addEventListener("change", this.handleFormOutput)
   }
   disconnectedCallback() {
     this.querySelector("form[name='header-panel']").removeEventListener("submit", this.handleFormHeader)
@@ -104,7 +103,7 @@ class Node extends HTMLElement {
     this.querySelector(".body").removeEventListener("touchstart", this.handleResizeTouch)
     this.querySelector(".body").removeEventListener("mousedown", this.handleResizeMouse)
     this.querySelector("form[name='input']").removeEventListener("change", this.handleFormInput)
-    this.querySelector("form[name='output']").removeEventListener("submit", this.handleFormOutput)
+    this.querySelector("form[name='output']").removeEventListener("change", this.handleFormOutput)
   }
   #subscribers = []
   subscribe(callback) {
@@ -173,26 +172,11 @@ class Node extends HTMLElement {
     const input = {}
     for (let [key, value] of data) input[key] = value
     this.emit({ input })
-    // switch (event.submitter.name) {
-    //   case "open-file":
-    //     console.log("open file")
-    //     break
-    //   default:
-    //     break
-    // }
   }
   handleFormOutput = (event) => {
     event.preventDefault()
     event.stopPropagation()
     console.log(event)
-
-    // switch (event.submitter.name) {
-    //   case "open-file":
-    //     break
-    //   default:
-    //     console.log(event)
-    //     break
-    // }
   }
   handleFormHeader = (event) => {
     event.preventDefault()
