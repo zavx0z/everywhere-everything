@@ -8,7 +8,6 @@
     <dev-tools mobile></dev-tools>
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="src/node.css" />
-    <link rel="stylesheet" href="src/sockets.css" />
     <script type="module">
       await new Promise((res) =>
         import("https://zavx0z.github.io/dev-tools/index.js")
@@ -18,78 +17,42 @@
             res({ error: err })
           })
       )
-      function initState(id) {
-        const state = localStorage.getItem(id)
-        const snapshot = state
-          ? JSON.parse(state)
-          : { position: { x: 11, y: 222 }, size: { width: 350 }, preview: true, input: {} }
-        localStorage.setItem(id, JSON.stringify(snapshot))
-        return snapshot
-      }
-      function updateState(id, patch) {
-        const state = JSON.parse(localStorage.getItem(id))
-        function upd(state, patch) {
-          for (let key in patch)
-            state[key] = typeof patch[key] === "object" ? upd(state[key], patch[key]) : (state[key] = patch[key])
-          return state
-        }
-        const newState = upd(state, patch)
-        localStorage.setItem(id, JSON.stringify(newState))
-      }
+      import { applyPatch, observe } from "https://cdn.jsdelivr.net/npm/fast-json-patch@3.1.1/+esm"
+      import Atom from "./src/index.js"
 
       const deviceID = "device-id"
       const channel = new BroadcastChannel(deviceID)
 
-      const URI = "./example/img-base64"
       const nodeID = "node-id"
-      const tag = "metafor-atom"
-
-      const load = (schemaURI, nodeURI) =>
-        Promise.all([
-          fetch(URI + "/schema.json").then((data) => data.json()),
-          import(URI + "/index.js").then((module) => module.default),
-          import("./src/index.js"),
-        ])
-      const [schema, Atom] = await load(URI)
-
+      import { initState, updateState } from "./src/state.js"
       const state = initState(nodeID)
-      const atom = document.createElement(tag)
-      customElements.define(tag, Atom)
 
-      const template = document.createElement("template")
-      template.innerHTML = /*html*/ `
-      <metafor-node
-        id="${nodeID}"
-        x="${state.position.x}"
-        y="${state.position.y}"
-        width="${state.size.width}"
-        preview="${state.preview}"
-      >
-      </metafor-node>
-      `
+      import { load } from "./src/utils.js"
+      const { element, schema } = await load("/example/img-base64")
 
-      const node = template.content.firstElementChild
-      node.schema = schema
-      document.body.append(template.content)
-      node.append(atom)
-
-      const unsubscribe = node.subscribe((data) => {
-        if (Object.keys(data).includes("input")) {
-          atom.exec(data.input, { render: true }).then((output) => {
-            for (let [key, value] of Object.entries(output)) {
-              console.log(key, value)
-            }
-          })
-        } else {
-          updateState(nodeID, data)
-          channel.postMessage(data)
-        }
-      })
-      channel.onmessage = ({ data }) => {
-        updateState(nodeID, data)
-        node.state = data
+      const atom = new Atom({id: nodeID, state, schema, element })
+      
+      atom.onchange = (patch) => {
+        const state = JSON.parse(localStorage.getItem(atom.id))
+        applyPatch(state, patch)
+        localStorage.setItem(atom.id, JSON.stringify(state))
+        channel.postMessage({ id: atom.id, patch })
       }
+      channel.onmessage = ({ data }) => {
+        console.log(data)
+      }
+      // const unsubscribe = node.subscribe((data) => {
+      //   if (Object.keys(data).includes("input")) {
+      //     atom.exec(data.input, { render: true }).then((output) => {
+      //       for (let [key, value] of Object.entries(output)) {
+      //         console.log(key, value)
+      //       }
+      //     })
+      //   }
+      // })
     </script>
   </head>
-  <body></body>
+  <body>
+    <div class="viewport"></div>
+  </body>
 </html>

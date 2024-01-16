@@ -1,3 +1,94 @@
+import { applyPatch } from "https://cdn.jsdelivr.net/npm/fast-json-patch@3.1.1/+esm"
+
+export default class Atom {
+  onchange = () => {}
+  constructor({ id, state, schema }) {
+    this.id = id
+    this.schema = schema
+    const node = new Node(schema, state)
+    node.state.onupdate = (patch) => {
+      this.onchange(patch)
+    }
+    document.body.querySelector(".viewport").appendChild(node)
+  }
+}
+class Position {
+  #style
+  get x() {
+    return parseFloat(this.#style.getPropertyValue("--x"))
+  }
+  set x(value) {
+    this.#style.setProperty("--x", value)
+  }
+  get y() {
+    return parseFloat(this.#style.getPropertyValue("--y"))
+  }
+  set y(value) {
+    this.#style.setProperty("--y", value)
+  }
+  constructor(style) {
+    this.#style = style
+  }
+}
+class Size {
+  #style
+  get width() {
+    return parseFloat(this.#style.getPropertyValue("--width"))
+  }
+  set width(value) {
+    this.#style.setProperty("--width", value)
+  }
+  constructor(style) {
+    this.#style = style
+  }
+}
+class State {
+  #buttonPreview
+  constructor(element, state) {
+    this.#buttonPreview = element.querySelector("button[name='preview']")
+    this.position = new Position(element.style)
+    this.size = new Size(element.style)
+
+    this.size.width = state.size.width
+    this.position.x = state.position.x
+    this.position.y = state.position.y
+    this.preview = state.preview
+
+    element.style.setProperty("--minWidth", 350)
+    element.style.opacity = 1
+  }
+  get preview() {
+    return this.#buttonPreview.value === "visible"
+  }
+  set preview(value) {
+    this.#buttonPreview.value = value ? "visible" : "hidden"
+  }
+  onupdate = (patch) => console.log("implement onupdate")
+  #onupdate = (patch) => {
+    if (patch.length) {
+      applyPatch(this, patch)
+      this.onupdate(patch)
+    }
+  }
+  updatePosition = (deltaX, deltaY) => {
+    let patch = []
+    if (deltaX !== 0) patch.push({ op: "replace", path: "/position/x", value: this.position.x + deltaX })
+    if (deltaY !== 0) patch.push({ op: "replace", path: "/position/y", value: this.position.y + deltaY })
+    this.#onupdate(patch)
+  }
+  updateWidth = (side, deltaX, minWidth) => {
+    if (deltaX !== 0) {
+      const width = side === "left" ? this.size.width - deltaX : this.size.width + deltaX
+      if (width > minWidth) {
+        this.#onupdate([
+          { op: "replace", path: "/position/x", value: this.position.x + deltaX / 2 },
+          { op: "replace", path: "/size/width", value: width },
+        ])
+      }
+    }
+  }
+  togglePreview = () => this.#onupdate([{ op: "replace", path: "/preview", value: !this.preview }])
+}
 function i18n(param) {
   if (param && typeof param === "object") {
     const current = document.documentElement.lang
@@ -7,45 +98,17 @@ function i18n(param) {
 }
 const html = String.raw
 class Node extends HTMLElement {
-  get state() {}
-  set state(value) {
-    console.log("state", value)
-    const x = value.position?.x
-    if (x) this.style.left = x + "px"
-
-    const y = value.position?.y
-    if (y) this.style.top = y + "px"
-
-    const width = value.size?.width
-    if (width) this.style.width = width + "px"
-
-    const preview = value.preview
-    if (typeof preview === "boolean")
-      this.querySelector("button[name='preview']").value = preview ? "visible" : "hidden"
-  }
-  append(element) {
-    const preview = this.querySelector(".preview > div")
-    preview.innerHTML = ""
-    preview.append(element)
-  }
-  constructor() {
+  constructor(schema, state) {
     super()
-    this.preview = this.innerHTML
-    this.channel = new BroadcastChannel(this.getAttribute("id"))
-    this.style.setProperty("--minWidth", 350)
-    this.style.width = this.getAttribute("width") + "px"
-    this.style.left = this.getAttribute("x") + "px"
-    this.style.top = this.getAttribute("y") + "px"
-    const { title, input, output } = this.schema
-    const previewVisible = this.getAttribute("preview") === "true"
+    const { title, input, output } = schema
     this.innerHTML = html`
       <div class="header">
         <div class="preview no-select" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
-          <div>${this.preview}</div>
+          <div></div>
         </div>
         <h1 class="no-select">${i18n(title)}</h1>
         <form name="header-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
-          <button name="preview" value=${previewVisible ? "visible" : "hidden"}></button>
+          <button name="preview" value="hidden"></button>
         </form>
       </div>
       <div class="body">
@@ -85,7 +148,7 @@ class Node extends HTMLElement {
         </form>
       </div>
     `
-    this.style.opacity = 1
+    this.state = new State(this, state)
   }
   connectedCallback() {
     this.querySelector("form[name='header-panel']").addEventListener("submit", this.handleFormHeader)
@@ -105,73 +168,13 @@ class Node extends HTMLElement {
     this.querySelector("form[name='input']").removeEventListener("change", this.handleFormInput)
     this.querySelector("form[name='output']").removeEventListener("change", this.handleFormOutput)
   }
-  #subscribers = []
-  subscribe(callback) {
-    this.#subscribers.push(callback)
-    return () => this.#subscribers.unshift(callback)
-  }
-  emit(data) {
-    this.#subscribers.forEach((callback) => callback(data))
-  }
-  updatePosition = (deltaX, deltaY) => {
-    if (deltaX !== 0 && deltaY !== 0) {
-      const positionX = this.offsetLeft + deltaX
-      const positionY = this.offsetTop + deltaY
-      this.style.left = positionX + "px"
-      this.style.top = positionY + "px"
-      this.emit({ position: { x: positionX, y: positionY } })
-    } else if (deltaX !== 0) {
-      const positionX = this.offsetLeft + deltaX
-      this.style.left = positionX + "px"
-      this.emit({ position: { x: positionX } })
-    } else if (deltaY !== 0) {
-      const positionY = this.offsetTop + deltaY
-      this.style.top = positionY + "px"
-      this.emit({ position: { y: positionY } })
-    }
-  }
-  updateWidth = (side, deltaX, minWidth) => {
-    if (deltaX !== 0) {
-      if (side === "left") {
-        const width = this.offsetWidth - deltaX
-        if (width > minWidth) {
-          const positionX = this.offsetLeft + deltaX
-          this.style.left = positionX + "px"
-          this.style.width = width + "px"
-          this.emit({ position: { x: positionX }, size: { width } })
-        }
-      } else if (side === "right") {
-        const width = this.offsetWidth + deltaX
-        if (width > minWidth) {
-          this.style.width = width + "px"
-          this.emit({ size: { width } })
-        }
-      }
-    }
-  }
-  updatePreview = (element) => {
-    element.value = element.value === "visible" ? "hidden" : "visible"
-    this.emit({ preview: element.value === "visible" })
-  }
-  handleMessage = (event) => {
-    const message = event.data
-    switch (message.type) {
-      case "preview":
-        this.querySelector("button[name='preview']").value = message.value ? "visible" : "hidden"
-        break
-      case "input":
-        break
-      case "output":
-        console.log(message)
-    }
-  }
   handleFormInput = (event) => {
     event.preventDefault()
     event.stopPropagation()
     const data = new FormData(event.currentTarget)
     const input = {}
     for (let [key, value] of data) input[key] = value
-    this.emit({ input })
+    // this.onupdate({ input })
   }
   handleFormOutput = (event) => {
     event.preventDefault()
@@ -183,7 +186,7 @@ class Node extends HTMLElement {
     event.stopPropagation()
     switch (event.submitter.name) {
       case "preview":
-        this.updatePreview(event.submitter)
+        this.state.togglePreview()
     }
   }
   handleResizeMouse = (event) => {
@@ -196,7 +199,7 @@ class Node extends HTMLElement {
       const side = event.target.parentElement.parentElement.name === "input" ? "right" : "left"
       const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
       const moveElement = (event) => {
-        this.updateWidth(side, event.clientX - initialX, minWidth)
+        this.state.updateWidth(side, event.clientX - initialX, minWidth)
         initialX = event.clientX
       }
       function stopElement() {
@@ -220,7 +223,7 @@ class Node extends HTMLElement {
       const side = event.touches[0].target.parentElement.parentElement.name === "input" ? "right" : "left"
       const minWidth = +getComputedStyle(this).getPropertyValue("--minWidth")
       const moveElement = (event) => {
-        this.updateWidth(side, event.touches[0].clientX - initialX, minWidth)
+        this.state.updateWidth(side, event.touches[0].clientX - initialX, minWidth)
         initialX = event.touches[0].clientX
       }
       function stopElement() {
@@ -237,7 +240,7 @@ class Node extends HTMLElement {
     let initialX = event.clientX
     let initialY = event.clientY
     const moveElement = (event) => {
-      this.updatePosition(event.clientX - initialX, event.clientY - initialY)
+      this.state.updatePosition(event.clientX - initialX, event.clientY - initialY)
       initialX = event.clientX
       initialY = event.clientY
     }
@@ -255,7 +258,7 @@ class Node extends HTMLElement {
       let initialX = event.touches[0].clientX
       let initialY = event.touches[0].clientY
       const moveElement = (event) => {
-        this.updatePosition(event.touches[0].clientX - initialX, event.touches[0].clientY - initialY)
+        this.state.updatePosition(event.touches[0].clientX - initialX, event.touches[0].clientY - initialY)
         initialX = event.touches[0].clientX
         initialY = event.touches[0].clientY
       }

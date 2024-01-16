@@ -1,12 +1,12 @@
-function initState(id) {
+export function initState(id) {
   const state = localStorage.getItem(id)
   const snapshot = state
     ? JSON.parse(state)
-    : { position: { x: 11, y: 222 }, size: { width: 350 }, preview: true, input: {} }
+    : { position: { x: 0, y: 0 }, size: { width: 350 }, preview: true }
   localStorage.setItem(id, JSON.stringify(snapshot))
   return snapshot
 }
-function updateState(id, patch) {
+export function updateState(id, patch) {
   const state = JSON.parse(localStorage.getItem(id))
   function upd(state, patch) {
     for (let key in patch)
@@ -15,12 +15,4 @@ function updateState(id, patch) {
   }
   const newState = upd(state, patch)
   localStorage.setItem(id, JSON.stringify(newState))
-}
-
-export class State {
-  constructor(nodeID) {
-    this.id = nodeID
-    initState(nodeID)
-  }
-  update() {}
 }
