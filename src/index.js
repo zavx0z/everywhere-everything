@@ -1,15 +1,19 @@
 import { applyPatch } from "https://cdn.jsdelivr.net/npm/fast-json-patch@3.1.1/+esm"
 
 export default class Atom {
-  onchange = () => {}
+  onupdate = () => {}
+  update = (patch) => {
+    if (this.node) applyPatch(this.node.state, patch)
+  }
   constructor({ id, state, schema }) {
     this.id = id
     this.schema = schema
     const node = new Node(schema, state)
     node.state.onupdate = (patch) => {
-      this.onchange(patch)
+      this.onupdate(patch)
     }
     document.body.querySelector(".viewport").appendChild(node)
+    this.node = node
   }
 }
 class Position {

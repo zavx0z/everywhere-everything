@@ -23,16 +23,17 @@
   --x: 0;
   --y: 0;
   --z: 0;
-  --width: 150;
-  --height: 150;
+  --width: 500;
+  --height: 500;
   --scale: 1;
+  left: -100px;
   height: calc(var(--height) * 1px);
   width: calc(var(--width) * 1px);
-  /* background-color: aquamarine; */
+  background-color: aquamarine;
   transform-origin: center;
   transform: translate(calc(100dvw / 2 - 50% + calc(var(--x) * 1px)), calc(100dvh / 2 - 50% + calc(var(--y) * 1px)))
     scale(var(--scale));
-  position: relative;
+  position: absolute;
 }
 metafor-node {
   --x: 0;

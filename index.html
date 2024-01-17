@@ -30,16 +30,15 @@
       import { load } from "./src/utils.js"
       const { element, schema } = await load("/example/img-base64")
 
-      const atom = new Atom({id: nodeID, state, schema, element })
-      
-      atom.onchange = (patch) => {
-        const state = JSON.parse(localStorage.getItem(atom.id))
+      const atom = new Atom({ id: nodeID, state, schema, element })
+
+      atom.onupdate = (patch) => {
         applyPatch(state, patch)
         localStorage.setItem(atom.id, JSON.stringify(state))
         channel.postMessage({ id: atom.id, patch })
       }
-      channel.onmessage = ({ data }) => {
-        console.log(data)
+      channel.onmessage = ({ data: { id, patch } }) => {
+        atom.update(patch)
       }
       // const unsubscribe = node.subscribe((data) => {
       //   if (Object.keys(data).includes("input")) {
