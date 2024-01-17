@@ -12,7 +12,7 @@ export default class Atom {
     node.state.onupdate = (patch) => {
       this.onupdate(patch)
     }
-    document.body.querySelector(".viewport").appendChild(node)
+    document.body.querySelector("metafor-viewport").appendChild(node)
     this.node = node
   }
 }
