@@ -27,14 +27,18 @@
 
   background-color: var(--surface-800);
   color: var(--primary-100);
-  body {
-    margin: 0;
-    padding: 0;
-    height: 100svh;
-    width: 100svw;
-    overflow: hidden;
-  }
+  overscroll-behavior: none;
+  overflow: hidden;
 }
+body, html {
+  overscroll-behavior: none;
+  margin: 0;
+  padding: 0;
+  height: 100dvh;
+  width: 100dvw;
+  overflow: hidden;
+}
+
 @layer utils {
   .no-select {
     /* prevent-select */

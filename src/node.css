@@ -1,32 +1,10 @@
-/* body {
-  --height: 150;
-  perspective: calc(((var(--height) / 2) / tan(0.3927)) * 1px);
-}
-.viewport {
-  --x: 0;
-  --y: 0;
-  --z: 0;
-  --width: 150;
-  --scale: 1;
-  height: calc(var(--height) * 1px);
-  width: calc(var(--width) * 1px);
-  background-color: aquamarine;
-  transform-origin: center;
-  transform: translate3d(
-    calc(100dvw / 2 - 50% + calc(var(--x) * 1px)),
-    calc(100dvh / 2 - 50% + calc(var(--y) * 1px)),
-    calc(var(--z) * 1px)
-  );
-  position: relative; */
-
 metafor-viewport {
   --x: 0;
   --y: 0;
   --z: 0;
-  --width: 500;
-  --height: 500;
+  --width: 0;
+  --height: 0;
   --scale: 1;
-  left: -100px;
   height: calc(var(--height) * 1px);
   width: calc(var(--width) * 1px);
   background-color: aquamarine;
@@ -34,6 +12,7 @@ metafor-viewport {
   transform: translate(calc(100dvw / 2 - 50% + calc(var(--x) * 1px)), calc(100dvh / 2 - 50% + calc(var(--y) * 1px)))
     scale(var(--scale));
   position: absolute;
+  z-index: 2;
 }
 metafor-node {
   --x: 0;
